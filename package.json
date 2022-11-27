@@ -9,7 +9,14 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/node": "^18.11.9",
+    "@types/three": "^0.146.0",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "@tweakpane/core": "^1.1.0",
+    "three": "^0.146.0",
+    "tweakpane": "^2.0.0"
   }
 }
