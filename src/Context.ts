@@ -1,11 +1,7 @@
 export class Context {
 
-    public static STAGE_WIDTH: number = 1080;
+    public static STAGE_WIDTH: number = 11012;
     public static STAGE_HEIGHT: number = 1080;
-
-    public static ROWS: number = 14;
-    public static COLS: number = 14;
-    public static SIZE: number = 72;
 
     private static _instance: Context;
 

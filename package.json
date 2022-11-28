@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@tweakpane/core": "^1.1.0",
+    "pixi.js": "^7.0.4",
     "three": "^0.146.0",
     "tweakpane": "^2.0.0"
   }
