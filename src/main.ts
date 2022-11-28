@@ -2,17 +2,20 @@ import { Application, Graphics } from "pixi.js";
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import { Context } from "./Context";
+import { ScreenHelper } from "./ScreenHelper";
 
 import './main.css';
 import './reset.css';
 
 // document.querySelector<HTMLDivElement>('#app')!.innerHTML = `<div><h1>HCK/TYO/JPN</h1></div>`;
-
+/**
+ * Main Class
+ */
 export class AppManager {
   private app: Application
   private graphics: Graphics
-  
-  private stats: Stats = Stats();
+
+  private stats: Stats = Stats()
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -21,8 +24,8 @@ export class AppManager {
     s: 0,
     l: 0.0
   };
-  public constructor() {
 
+  public constructor() {
     this.app = new Application({
       width: Context.STAGE_WIDTH,
       height: Context.STAGE_HEIGHT,
@@ -32,53 +35,19 @@ export class AppManager {
       autoDensity: true, // !!!
       resolution: 2,
     });
-    
-    document.body.appendChild(this.app.view)
+
+    document.body.appendChild(this.app.view as HTMLCanvasElement)
     this.app.stage.sortableChildren = true
 
     this.graphics = new Graphics()
-    let left: number = 0
-    this.app.stage.addChild(this.graphics);
-    this.graphics.beginFill(0x444444);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    left += 1549
+    const areaGraphics = ScreenHelper.GetScreenArea()
+    this.graphics.addChild(areaGraphics)
+    const grids = ScreenHelper.GetGrids()
+    this.graphics.addChild(grids)
 
-    this.graphics.beginFill(0x555555);
-    this.graphics.drawRect(left,0,859,1080)
-    this.graphics.endFill()
-    left += 859
+    this.app.stage.addChild(this.graphics)
 
-    this.graphics.beginFill(0x666666);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    left += 1549
-
-    this.graphics.beginFill(0x7f7f7f);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    left += 1549
-
-    this.graphics.beginFill(0x707070);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    left += 1549
-
-    this.graphics.beginFill(0x666666);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    left += 1549
-
-    this.graphics.beginFill(0x555555);
-    this.graphics.drawRect(left,0,859,1080)
-    this.graphics.endFill()
-    left += 859
-
-    this.graphics.beginFill(0x444444);
-    this.graphics.drawRect(left,0,1549,1080)
-    this.graphics.endFill()
-    
-    this.init();
+    this.init()
 
   }
 
@@ -103,6 +72,6 @@ export class AppManager {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("[Main.ts]: DOMContentLoaded");
-  new AppManager();
+  console.log("[Main.ts]: DOMContentLoaded")
+  new AppManager()
 });
