@@ -15,8 +15,8 @@ export class AppManager {
     h: 140,
     s: 0,
     l: 0.0
-};
-  public constructor(){
+  };
+  public constructor() {
 
     this.init();
 
@@ -71,7 +71,7 @@ export class AppManager {
           "fill-extrusion-color": [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
-            "#cccccc", "#333333"
+            "#888888", "#999999"
           ],
           "fill-extrusion-height": ["get", "measuredHeight"]
         }
@@ -83,74 +83,21 @@ export class AppManager {
       "center": [139.68786, 35.68355],
       "zoom": 14.65,
       // "pitch": 60,
-      "pitch": 0,
+      "pitch": 80,
       // "bearing": 22,
-      "bearing": 180,
+      "bearing": 0,
       "hash": true,
       "style": style
     });
 
 
-    let hoveredStateId = null;
-    style.layers.filter(a => a.id.indexOf("bldg") === 0).forEach(layer => {
-      const id = layer.id;
-      // When a click event occurs on a feature in the places layer, open a popup at the
-      // location of the feature, with description HTML from its properties.
-      map.on('click', id, function(e) {
-        const dl = document.createElement("dl");
-        const prop = e.features[0].properties;
-        const html = "<div class='my-popup'>" + Object.keys(prop).map(k => `<b>${k}</b> <span>${prop[k]}</span>`).join("<br/>") + "</div>"
-        new maplibregl.Popup()
-          .setLngLat(e.lngLat)
-          .setHTML(html)
-          .addTo(map);
-      });
+    // let hoveredStateId = null;
+    // style.layers.filter(a => a.id.indexOf("bldg") === 0).forEach(layer => {
+    //   const id = layer.id;
+    //   // When a click event occurs on a feature in the places layer, open a popup at the
+    //   // location of the feature, with description HTML from its properties.
 
-      // Change the cursor to a pointer when the mouse is over the places layer.
-      map.on('mouseenter', id, function() {
-        map.getCanvas().style.cursor = 'pointer';
-      });
-
-      // Change it back to a pointer when it leaves.
-      map.on('mouseleave', id, function() {
-        map.getCanvas().style.cursor = '';
-        if (hoveredStateId) {
-          map.setFeatureState({
-            source: "plateau",
-            id: hoveredStateId,
-            sourceLayer: "bldg"
-          }, {
-            hover: false
-          });
-        }
-        hoveredStateId = null;
-      });
-
-
-      // When the user moves their mouse over the state-fill layer, we'll update the
-      // feature state for the feature under the mouse.
-      map.on('mousemove', id, function(e) {
-        if (e.features.length > 0) {
-          if (hoveredStateId) {
-            map.setFeatureState({
-              source: "plateau",
-              id: hoveredStateId,
-              sourceLayer: "bldg"
-            }, {
-              hover: false
-            });
-          }
-          hoveredStateId = e.features[0].id;
-          map.setFeatureState({
-            source: "plateau",
-            id: hoveredStateId,
-            sourceLayer: "bldg"
-          }, {
-            hover: true
-          });
-        }
-      });
-    });
+    // });
 
 
 
