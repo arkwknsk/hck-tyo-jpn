@@ -108,6 +108,11 @@
   resolved "https://registry.yarnpkg.com/@pixi/graphics/-/graphics-7.0.4.tgz#09fa373be449420ad586844ec97e478ac959fee8"
   integrity sha512-k6hnScltWw1dZf6C6/cyKBEUOaddd10AMon2fJbW5a903igirarncDZEg3mrMh0Tku7vIp4o6afZ7a+p0ocptQ==
 
+"@pixi/loaders@^6.5.8":
+  version "6.5.8"
+  resolved "https://registry.yarnpkg.com/@pixi/loaders/-/loaders-6.5.8.tgz#5fe2e74c2c532b4bb900063ee2f33385e5446f7a"
+  integrity sha512-mj11UPKsqWaTEPMpCnFugr6heKkQeNFuVSddSwE8crg19l46zcMhk3ucpQX15RDpAdDJjtl3OraevQCHHbNENw==
+
 "@pixi/math@7.0.4":
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@pixi/math/-/math-7.0.4.tgz#14b96ae4c4797fd52b9e019cbd40c0fd4523ee63"

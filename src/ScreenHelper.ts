@@ -7,6 +7,10 @@ export class ScreenHelper {
     public static LARGE_SCREEN: number = ScreenHelper.LARGE_AREA * 2
     public static SIDE_SCREEN: number = ScreenHelper.SMALL_AREA + ScreenHelper.LARGE_AREA
 
+    public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_AREA;
+    public static FRONT_SCREEN_LEFT: number = ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
+    public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN;
+
     /**
      * NEORT++用のスクリーンエリア
      * @returns Graphics of スクリーンエリア
