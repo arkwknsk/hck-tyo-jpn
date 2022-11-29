@@ -112,11 +112,6 @@ export class AppManager {
     message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
     message2.y = 110
     appManager.graphics.addChild(message2);
-    const message3 = message2
-    message3.x = ScreenHelper.RIGHT_SCREEN_LEFT;
-    message3.y = 110
-    appManager.graphics.addChild(message3);
-
   }
 
 }
