@@ -81,22 +81,42 @@ export class AppManager {
       }]
     };
 */
-    // const map = new maplibregl.Map({
-      new maplibregl.Map({
+    const map = new maplibregl.Map({
       "container": "map",
       center: [139.767144, 35.680621],
-      zoom: 15,
+      zoom: 14,
       maxZoom: 17.99,
       minZoom: 4,
       "pitch": 0,
       "maxPitch": 85,
       // "bearing": 22,
       "bearing": 0,
-      "hash": true,
+      "hash": false,
       "style": blank
     });
 
+    map.on('load', function () {
+      console.log('レンダリング済');
+  });
+
     // map.addControl( );
+    var map2Element = document.createElement('div');
+    document.body.appendChild(map2Element);
+    map2Element.setAttribute("id","map2")
+    map2Element.setAttribute("style", "position:absolute;top:0;left:330px;bottom:0;right:0;width:320px;height:320px;");
+    const map2 = new maplibregl.Map({
+      "container": "map2",
+      center: [139.967144, 35.680621],
+      zoom: 14,
+      maxZoom: 17.99,
+      minZoom: 4,
+      "pitch": 0,
+      "maxPitch": 85,
+      // "bearing": 22,
+      "bearing": 0,
+      "hash": false,
+      "style": blank
+    });
 
     // let hoveredStateId = null;
     // style.layers.filter(a => a.id.indexOf("bldg") === 0).forEach(layer => {
