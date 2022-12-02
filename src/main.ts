@@ -1,6 +1,7 @@
 import maplibregl from 'maplibre-gl';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
+import blank from './assets/blank.json';
 
 import './reset.css';
 
@@ -30,18 +31,20 @@ export class AppManager {
     });
 
 
+    /*
     const style = {
       "version": 8,
       "glyphs": "https://maps.gsi.go.jp/xyz/noto-jp/{fontstack}/{range}.pbf",
       "sources": {
         "pale": {
-          "type": "raster",
+          "type": "vector",
           "tiles": [
-            "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"
+            // "https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png"
+            "https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"
           ],
-          "minzoom": 5,
-          "maxzoom": 18,
-          "tileSize": 256,
+          "minzoom": 4,
+          "maxzoom": 16,
+          // "tileSize": 256,
           "attribution": "<a href='http://maps.gsi.go.jp/development/ichiran.html'>地理院タイル</a>"
         },
         "plateau": {
@@ -56,10 +59,10 @@ export class AppManager {
       },
       "layers": [{
         "id": "pale",
-        "type": "raster",
+        "type": "fill",
         "source": "pale",
-        "minzoom": 5,
-        "maxzoom": 20
+        "minzoom": 4,
+        "maxzoom": 16
       }, {
         "id": "bldg",
         "type": "fill-extrusion",
@@ -71,25 +74,29 @@ export class AppManager {
           "fill-extrusion-color": [
             'case',
             ['boolean', ['feature-state', 'hover'], false],
-            "#888888", "#999999"
+            "#888888", "#000000"
           ],
           "fill-extrusion-height": ["get", "measuredHeight"]
         }
       }]
     };
-
-    const map = new maplibregl.Map({
+*/
+    // const map = new maplibregl.Map({
+      new maplibregl.Map({
       "container": "map",
-      "center": [139.68786, 35.68355],
-      "zoom": 14.65,
-      // "pitch": 60,
-      "pitch": 80,
+      center: [139.767144, 35.680621],
+      zoom: 15,
+      maxZoom: 17.99,
+      minZoom: 4,
+      "pitch": 0,
+      "maxPitch": 85,
       // "bearing": 22,
       "bearing": 0,
       "hash": true,
-      "style": style
+      "style": blank
     });
 
+    // map.addControl( );
 
     // let hoveredStateId = null;
     // style.layers.filter(a => a.id.indexOf("bldg") === 0).forEach(layer => {
