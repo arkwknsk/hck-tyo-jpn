@@ -18,7 +18,9 @@ export class AppManager {
 
   private stats: Stats;
 
-  private static map: Map | undefined;
+  private static map: Map | undefined
+
+  private static maps: Map[] | undefined
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -97,48 +99,8 @@ export class AppManager {
     // console.debug(layers);
     Blank.layers = layers;
 
-    AppManager.map = new Map({
-      "container": "map",
-      center: [139.767144, 35.680621],
-      zoom: 14,
-      maxZoom: 17.99,
-      minZoom: 4,
-      "pitch": 0,
-      "maxPitch": 85,
-      // "bearing": 22,
-      "bearing": 0,
-      "hash": false,
-      "style": Blank as StyleSpecification
-    });
+    // this.createMap();
 
-    AppManager.map.on('load', function () {
-      console.log('Complete Rendering');
-    });
-
-    // map.addControl( );
-    var map2Element = document.createElement('div');
-    document.body.appendChild(map2Element);
-    map2Element.setAttribute("id", "map2")
-    map2Element.setAttribute("style", "position:absolute;top:0;left:330px;bottom:0;right:0;width:320px;height:320px;");
-    const map2 = new Map({
-      "container": "map2",
-      center: [139.967144, 35.680621],
-      zoom: 14,
-      maxZoom: 17.99,
-      minZoom: 4,
-      "pitch": 0,
-      "maxPitch": 85,
-      // "bearing": 22,
-      "bearing": 0,
-      "hash": false,
-      "style": Blank as StyleSpecification
-    });
-    map2.on('load', function () {
-      console.log('Complete Rendering');
-    });
-    map2.on('zoom', function () {
-      console.log(map2.getZoom());
-    });
     pane.addInput(AppManager.INPUTS, 'h', {
       min: 0,
       max: 360,
@@ -152,7 +114,7 @@ export class AppManager {
 
       antialias: true,
       autoDensity: true, // !!!
-      resolution: 2,
+      resolution: 1,
     });
 
     const app = document.getElementById('app');
@@ -222,6 +184,10 @@ export class AppManager {
 
   }
 
+  /**
+   * レイヤーの中から建物だけを抽出
+   * @returns フィルタリング後のレイヤー
+   */
   static filterLayer(): any {
     const wantLayer = ['building', 'structurea', 'structurel', 'wstructurea']
     const evenValues = Blank.layers.filter((value) => {
@@ -239,6 +205,37 @@ export class AppManager {
     })
 
     return evenValues
+  }
+
+  static createMap(): void {
+
+    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+      var mapElement = document.createElement('div');
+      document.body.appendChild(mapElement);
+      const mapID = 'map' + i.toString()
+      mapElement.setAttribute("id", mapID)
+      // const left = ScreenHelper.FRONT_SCREEN_LEFT + Context.MAP_WIDTH * i;
+      const left = Context.STAGE_WIDTH / 2 + + Context.MAP_WIDTH / 2 + Context.MAP_WIDTH * i;
+      mapElement.setAttribute("style", `position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH}px;height:${Context.MAP_HEIGHT}px;`);
+
+      AppManager.map = new Map({
+        "container": mapID,
+        center: [139.767144, 35.680621],
+        zoom: 15,
+        maxZoom: 17.99,
+        minZoom: 4,
+        "pitch": 0,
+        "maxPitch": 85,
+        "bearing": 0,
+        "hash": false,
+        "style": Blank as StyleSpecification
+      });
+
+      AppManager.map.on('load', function () {
+        console.log('Complete Rendering');
+      });
+
+    }
   }
 
 }
