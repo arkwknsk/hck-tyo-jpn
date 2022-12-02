@@ -1,8 +1,8 @@
-import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import { Map, StyleSpecification } from 'maplibre-gl';
 import { Application, Assets, Graphics, Text } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
-import blank from './assets/blank.json';
+import Blank from './assets/o186ulfx6.json';
 import { Context } from './Context';
 import { ScreenHelper } from './ScreenHelper';
 
@@ -17,6 +17,8 @@ export class AppManager {
   private graphics: Graphics | undefined
 
   private stats: Stats;
+
+  private static map: Map | undefined;
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -90,7 +92,12 @@ export class AppManager {
       }]
     };
 */
-    const map = new maplibregl.Map({
+
+    const layers = this.filterLayer();
+    // console.debug(layers);
+    Blank.layers = layers;
+
+    AppManager.map = new Map({
       "container": "map",
       center: [139.767144, 35.680621],
       zoom: 14,
@@ -101,10 +108,10 @@ export class AppManager {
       // "bearing": 22,
       "bearing": 0,
       "hash": false,
-      "style": blank as StyleSpecification
+      "style": Blank as StyleSpecification
     });
 
-    map.on('load', function () {
+    AppManager.map.on('load', function () {
       console.log('Complete Rendering');
     });
 
@@ -113,7 +120,7 @@ export class AppManager {
     document.body.appendChild(map2Element);
     map2Element.setAttribute("id", "map2")
     map2Element.setAttribute("style", "position:absolute;top:0;left:330px;bottom:0;right:0;width:320px;height:320px;");
-    const map2 = new maplibregl.Map({
+    const map2 = new Map({
       "container": "map2",
       center: [139.967144, 35.680621],
       zoom: 14,
@@ -124,12 +131,14 @@ export class AppManager {
       // "bearing": 22,
       "bearing": 0,
       "hash": false,
-      "style": blank as StyleSpecification
+      "style": Blank as StyleSpecification
     });
     map2.on('load', function () {
       console.log('Complete Rendering');
     });
-
+    map2.on('zoom', function () {
+      console.log(map2.getZoom());
+    });
     pane.addInput(AppManager.INPUTS, 'h', {
       min: 0,
       max: 360,
@@ -195,7 +204,6 @@ export class AppManager {
     message.x = ScreenHelper.FRONT_SCREEN_LEFT
     appManager.graphics.addChild(message);
 
-
     const message2 = new Text(
       'LAT: 35.7 ',
       {
@@ -211,9 +219,30 @@ export class AppManager {
     message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
     message2.y = 110
     appManager.graphics.addChild(message2);
+
+  }
+
+  static filterLayer(): any {
+    const wantLayer = ['building', 'structurea', 'structurel', 'wstructurea']
+    const evenValues = Blank.layers.filter((value) => {
+      if (value["source-layer"] !== undefined) {
+        if (wantLayer.includes(value["source-layer"])) {
+          return true;
+        } else {
+          return false;
+        }
+      } else if (value["id"] === 'background') {
+        return true;
+      } else {
+        return false
+      }
+    })
+
+    return evenValues
   }
 
 }
+
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("[Main.ts]: DOMContentLoaded")
