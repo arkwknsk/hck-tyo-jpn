@@ -1,7 +1,10 @@
-import maplibregl from 'maplibre-gl';
+import maplibregl, { StyleSpecification } from 'maplibre-gl';
+import { Application, Assets, Graphics, Text } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import blank from './assets/blank.json';
+import { Context } from './Context';
+import { ScreenHelper } from './ScreenHelper';
 
 import './main.css';
 import './reset.css';
@@ -13,7 +16,7 @@ export class AppManager {
   private app: Application | undefined
   private graphics: Graphics | undefined
 
-  private stats: Stats = Stats()
+  private stats: Stats;
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -22,9 +25,6 @@ export class AppManager {
     s: 0,
     l: 0.0
   };
-  public constructor() {
-
-    this.init();
 
   private constructor() {
     this.stats = Stats()
@@ -101,17 +101,17 @@ export class AppManager {
       // "bearing": 22,
       "bearing": 0,
       "hash": false,
-      "style": blank
+      "style": blank as StyleSpecification
     });
 
     map.on('load', function () {
-      console.log('レンダリング済');
-  });
+      console.log('Complete Rendering');
+    });
 
     // map.addControl( );
     var map2Element = document.createElement('div');
     document.body.appendChild(map2Element);
-    map2Element.setAttribute("id","map2")
+    map2Element.setAttribute("id", "map2")
     map2Element.setAttribute("style", "position:absolute;top:0;left:330px;bottom:0;right:0;width:320px;height:320px;");
     const map2 = new maplibregl.Map({
       "container": "map2",
@@ -124,18 +124,11 @@ export class AppManager {
       // "bearing": 22,
       "bearing": 0,
       "hash": false,
-      "style": blank
+      "style": blank as StyleSpecification
     });
-
-    // let hoveredStateId = null;
-    // style.layers.filter(a => a.id.indexOf("bldg") === 0).forEach(layer => {
-    //   const id = layer.id;
-    //   // When a click event occurs on a feature in the places layer, open a popup at the
-    //   // location of the feature, with description HTML from its properties.
-
-    // });
-
-
+    map2.on('load', function () {
+      console.log('Complete Rendering');
+    });
 
     pane.addInput(AppManager.INPUTS, 'h', {
       min: 0,
@@ -153,19 +146,25 @@ export class AppManager {
       resolution: 2,
     });
 
-    document.body.appendChild(appManager.app.view as HTMLCanvasElement)
-    appManager.app.stage.sortableChildren = true
+    const app = document.getElementById('app');
+    if (app) {
+      app.appendChild(appManager.app.view as HTMLCanvasElement)
+      console.log("[Main]: Added PIXI")
+      appManager.app.stage.sortableChildren = true
+    }
     // .on('change', (ev) => {
     //     // this.drawBackground()
     // });
 
-    await Assets.load({
-      data: {
-        weights: ['bold'],
-      },
-      src: "DIN_Alternate_Bold.ttf",
-    }
-    );
+    // await Assets.load({
+    //   data: {
+    //     weights: ['bold'],
+    //   },
+    //   src: "DIN_Alternate_Bold.ttf",
+    // }
+    // ).catch((error) => {
+    //   console.log(error.message);
+    // })
 
     await Assets.load({
       src: "Inter-VariableFont_slnt,wght.ttf",
@@ -200,8 +199,8 @@ export class AppManager {
     const message2 = new Text(
       'LAT: 35.7 ',
       {
-        // fontFamily: "Inter",
-        fontFamily: "DIN Alternate Bold",
+        fontFamily: "Inter",
+        // fontFamily: "DIN Alternate Bold",
         fontWeight: "700",
         fill: 0xffffff,
         fontSize: 120,
