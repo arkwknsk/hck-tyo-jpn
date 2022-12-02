@@ -1,9 +1,10 @@
-body{
+body {
     background-color: #333333;
 }
 
-#app{
+#app {
     width: 11012px;
     height: 1080px;
-    background:#000000;
+    background: #000000;
+    z-index: 1000;
 }
