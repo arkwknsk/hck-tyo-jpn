@@ -2,12 +2,13 @@ import { Graphics } from "pixi.js";
 import { Context } from "./Context";
 
 export class ScreenHelper {
+    // RED -> BLUE -> GREEN -> ORANGE
     public static SMALL_AREA: number = 859
-    public static LARGE_AREA: number = 1549
-    public static LARGE_SCREEN: number = ScreenHelper.LARGE_AREA * 2
-    public static SIDE_SCREEN: number = ScreenHelper.SMALL_AREA + ScreenHelper.LARGE_AREA
+    public static LARGE_AREA: number = 3098 / 2
+    public static LARGE_SCREEN: number = 3098
+    public static SIDE_SCREEN: number = 2408
 
-    public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_AREA;
+    public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_SCREEN / 2;
     public static FRONT_SCREEN_LEFT: number = ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
     public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN;
 
@@ -73,10 +74,12 @@ export class ScreenHelper {
         g.lineStyle(1, 0xFFFF00).moveTo(Context.STAGE_WIDTH / 2 - crossSize, Context.STAGE_HEIGHT / 2).lineTo(Context.STAGE_WIDTH / 2 + crossSize, Context.STAGE_HEIGHT / 2)
 
         g.lineStyle(1, 0xFF0000)
-        g.drawRect(Context.STAGE_WIDTH / 2 - ScreenHelper.LARGE_SCREEN / 2, 0, ScreenHelper.LARGE_SCREEN, Context.STAGE_HEIGHT)
+        g.drawRect(ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SMALL_AREA + ScreenHelper.LARGE_AREA, 0, ScreenHelper.LARGE_SCREEN, Context.STAGE_HEIGHT)
 
+        g.lineStyle(2, 0xFF0000)
         g.drawRect(ScreenHelper.LARGE_AREA, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
-        g.drawRect(Context.STAGE_WIDTH / 2 + ScreenHelper.LARGE_SCREEN / 2, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+        // g.drawRect(0, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+        // g.drawRect(Context.STAGE_WIDTH / 2 + ScreenHelper.LARGE_SCREEN / 2, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
 
         return g
     }
