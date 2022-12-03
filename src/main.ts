@@ -4,6 +4,7 @@ import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
 import { Context } from './Context';
+import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 
 import './main.css';
@@ -20,7 +21,7 @@ export class AppManager {
 
   private static map: Map | undefined
 
-  private static maps: Map[] | undefined
+  private static mapDataUrl: String[]
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -95,11 +96,6 @@ export class AppManager {
     };
 */
 
-    const layers = this.filterLayer();
-    // console.debug(layers);
-    Blank.layers = layers;
-
-    // this.createMap();
 
     pane.addInput(AppManager.INPUTS, 'h', {
       min: 0,
@@ -123,19 +119,6 @@ export class AppManager {
       console.log("[Main]: Added PIXI")
       appManager.app.stage.sortableChildren = true
     }
-    // .on('change', (ev) => {
-    //     // this.drawBackground()
-    // });
-
-    // await Assets.load({
-    //   data: {
-    //     weights: ['bold'],
-    //   },
-    //   src: "DIN_Alternate_Bold.ttf",
-    // }
-    // ).catch((error) => {
-    //   console.log(error.message);
-    // })
 
     await Assets.load({
       src: "Inter-VariableFont_slnt,wght.ttf",
@@ -181,6 +164,22 @@ export class AppManager {
     message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
     message2.y = 110
     appManager.graphics.addChild(message2);
+    const layers = this.filterLayer()
+    // console.debug(layers);
+    Blank.layers = layers
+
+    console.log("[Main]: Before createMapCopyCanvas")
+    await this.initMap()
+    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+      var rasterMap: RasterMap = {
+        id: i, lat: 35.6895014 + Math.random() * i * 0.025, lng: 139.6917337 + Math.random() * i * 0.025,
+
+      }
+      rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+      console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
+    }
+
+    console.log("[Main]: After createMapCopyCanvas")
 
   }
 
@@ -207,20 +206,29 @@ export class AppManager {
     return evenValues
   }
 
-  static createMap(): void {
+  static initMap(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
+      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
+      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
+      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
 
-    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
-      var mapElement = document.createElement('div');
+      resolve()
+    })
+  }
+
+  static createMapCopyCanvas(index: number, lat: number, lng: number): Promise<HTMLImageElement> {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+      var mapElement = document.createElement('div')
       document.body.appendChild(mapElement);
-      const mapID = 'map' + i.toString()
+      const mapID = `map${index}`
       mapElement.setAttribute("id", mapID)
-      // const left = ScreenHelper.FRONT_SCREEN_LEFT + Context.MAP_WIDTH * i;
-      const left = Context.STAGE_WIDTH / 2 + + Context.MAP_WIDTH / 2 + Context.MAP_WIDTH * i;
-      mapElement.setAttribute("style", `position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH}px;height:${Context.MAP_HEIGHT}px;`);
+      const left = 0
+      mapElement.setAttribute("style", `position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
 
       AppManager.map = new Map({
         "container": mapID,
-        center: [139.767144, 35.680621],
+        center: [lng, lat],
         zoom: 15,
         maxZoom: 17.99,
         minZoom: 4,
@@ -231,12 +239,44 @@ export class AppManager {
         "style": Blank as StyleSpecification
       });
 
-      AppManager.map.on('load', function () {
-        console.log('Complete Rendering');
-      });
+      if (AppManager.map) {
+        AppManager.map.once('load', function () {
+          let data: string;
+          var mapElement = document.getElementById(mapID)
+          if (mapElement) {
+            const mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
+            const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
 
-    }
+            if (cacheCanvasElement) {
+              const cacheCanvasContext = cacheCanvasElement.getContext('2d')
+              if (cacheCanvasContext) {
+                console.log(`[Main:createMapCopyCanvas]: setTimeout index:${index}`)
+
+                data = mapCanvasElement.toDataURL()
+                console.log(data)
+                var img = new Image(Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+                img.src = data
+                // document.body.appendChild(img)
+
+                // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+                cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+                document.body.removeChild(mapElement)
+                resolve(img)
+                // document.body.appendChild(cacheCanvasElement)
+              }
+              else {
+                reject()
+              }
+            }
+            else {
+              reject()
+            }
+          }
+        });
+      }
+    });
   }
+
 
 }
 
