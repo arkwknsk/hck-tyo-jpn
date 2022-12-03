@@ -1,5 +1,5 @@
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, Graphics, Text } from 'pixi.js';
+import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -15,13 +15,14 @@ import './reset.css';
  */
 export class AppManager {
   private app: Application | undefined
-  private graphics: Graphics | undefined
+  private static graphics: Graphics | undefined
 
   private stats: Stats;
 
   private static map: Map | undefined
 
-  private static mapDataUrl: String[]
+  private static rasterMaps: RasterMap[]
+
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -106,7 +107,7 @@ export class AppManager {
     appManager.app = new Application({
       width: Context.STAGE_WIDTH,
       height: Context.STAGE_HEIGHT,
-      backgroundColor: '#222222',
+      backgroundColor: '#000000',
 
       antialias: true,
       autoDensity: true, // !!!
@@ -126,13 +127,13 @@ export class AppManager {
     );
     console.log("[Main]: Loaded fonts")
 
-    appManager.graphics = new Graphics()
-    const areaGraphics = ScreenHelper.GetScreenArea()
-    appManager.graphics.addChild(areaGraphics)
+    AppManager.graphics = new Graphics()
+    // const areaGraphics = ScreenHelper.GetScreenArea()
+    // AppManager.graphics.addChild(areaGraphics)
     const grids = ScreenHelper.GetGrids()
-    appManager.graphics.addChild(grids)
+    if (AppManager.graphics) AppManager.graphics.addChild(grids)
 
-    appManager.app.stage.addChild(appManager.graphics)
+    appManager.app.stage.addChild(AppManager.graphics)
 
     const message = new Text(
       'HCK/TYO/JPN',
@@ -147,7 +148,7 @@ export class AppManager {
       }
     );
     message.x = ScreenHelper.FRONT_SCREEN_LEFT
-    appManager.graphics.addChild(message);
+    AppManager.graphics.addChild(message);
 
     const message2 = new Text(
       'LAT: 35.7 ',
@@ -163,24 +164,26 @@ export class AppManager {
     );
     message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
     message2.y = 110
-    appManager.graphics.addChild(message2);
+    AppManager.graphics.addChild(message2);
     const layers = this.filterLayer()
     // console.debug(layers);
     Blank.layers = layers
 
     console.log("[Main]: Before createMapCopyCanvas")
     await this.initMap()
+    this.rasterMaps = []
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
       var rasterMap: RasterMap = {
         id: i, lat: 35.6895014 + Math.random() * i * 0.025, lng: 139.6917337 + Math.random() * i * 0.025,
 
       }
       rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+      this.rasterMaps.push(rasterMap)
       console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
 
     console.log("[Main]: After createMapCopyCanvas")
-
+    this.addRasterMap()
   }
 
   /**
@@ -250,10 +253,8 @@ export class AppManager {
             if (cacheCanvasElement) {
               const cacheCanvasContext = cacheCanvasElement.getContext('2d')
               if (cacheCanvasContext) {
-                console.log(`[Main:createMapCopyCanvas]: setTimeout index:${index}`)
-
                 data = mapCanvasElement.toDataURL()
-                console.log(data)
+                // console.log(data)
                 var img = new Image(Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
                 img.src = data
                 // document.body.appendChild(img)
@@ -277,6 +278,32 @@ export class AppManager {
     });
   }
 
+  static addRasterMap() {
+    let i = 0
+    const cols = 42
+    const rows = 3
+    const scale = 0.75
+    const marginY = (Context.STAGE_HEIGHT - Context.MAP_HEIGHT * scale * rows) / (rows + 1)
+    const marginX = 45
+    AppManager.rasterMaps.forEach(item => {
+      console.log("[Main] addRasterMap")
+      if (AppManager.graphics) {
+        const loadTexture = new Texture(new BaseTexture(item.image))
+        const loadSprite = new Sprite(loadTexture)
+        // loadSprite.anchor.set(0.5)
+        loadSprite.x = marginX + (i % cols) * Context.MAP_WIDTH * scale + marginX * (i % cols)
+
+        loadSprite.y = marginY + Math.round(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.round(i / cols)
+        console.log(`[Main] addRasterMap x:${loadSprite.x} ${i % cols} , ${loadSprite.y} ${marginY}`)
+
+        loadSprite.width = Context.MAP_WIDTH * 0.75
+        loadSprite.height = Context.MAP_HEIGHT * 0.75
+        AppManager.graphics.addChild(loadSprite)
+      }
+
+      i++
+    });
+  }
 
 }
 

@@ -3,7 +3,7 @@ export class Context {
     public static STAGE_WIDTH: number = 11012;
     public static STAGE_HEIGHT: number = 1080;
 
-    public static NUMBER_MAPS: number = 24
+    public static NUMBER_MAPS: number = 100
     public static MAP_WIDTH = 300
     public static MAP_HEIGHT = 300
 
