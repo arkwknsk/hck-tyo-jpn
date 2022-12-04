@@ -1,7 +1,6 @@
 import { AppManager } from './main'
 import { gsap } from 'gsap';
-// import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle } from 'pixi.js';
-import { Graphics, Text, TextStyle } from 'pixi.js';
+import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle } from 'pixi.js';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 // import { Context } from './Context';
@@ -17,8 +16,9 @@ export class MapPanel extends Graphics {
   private lngValue = new Text()
   private dispLatValue: string = ''
   private dispLatCursor: number = 0
-  // private dispLngCursor: number = 0
-  // private dispLngValue: string = ''
+  private dispLngCursor: number = 0
+  private dispLngValue: string = ''
+  // private prevTime: number = 0
 
   public constructor(rasterMaps: RasterMap) {
     super();
@@ -33,7 +33,7 @@ export class MapPanel extends Graphics {
     this._mapArea.beginFill(0xcccccc)
     this._mapArea.drawRect(0, ScreenHelper.UNIT * 2, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6)
 
-    this.addChild(this._mapArea)
+    // this.addChild(this._mapArea)
 
 
     const style: TextStyle = new TextStyle({
@@ -56,20 +56,30 @@ export class MapPanel extends Graphics {
     this.latValue.text = this._rasterMap.lat.toString()
     this.addChild(this.latValue);
 
-    this.lngValue = new Text('', style);
-    this.lngValue.x = ScreenHelper.UNIT
-    this.lngValue.y = 32
-    this.lngValue.text = this._rasterMap.lng.toString()
-    this.addChild(this.lngValue);
-
-
     const lngLabel = new Text(
       `Lng:`, style
     );
     lngLabel.x = 0
-    lngLabel.y = 32
+    lngLabel.y = 24
     this.addChild(lngLabel);
+
+    this.lngValue = new Text('', style);
+    this.lngValue.x = ScreenHelper.UNIT
+    this.lngValue.y = 24
+    this.lngValue.text = this._rasterMap.lng.toString()
+    this.addChild(this.lngValue);
+
+    const loadTexture = new Texture(new BaseTexture(this._rasterMap.image))
+    const mapSprite = new Sprite(loadTexture)
+    mapSprite.x = 0
+    mapSprite.y = ScreenHelper.UNIT * 2
+    mapSprite.width = ScreenHelper.UNIT * 6
+    mapSprite.height = ScreenHelper.UNIT * 6
+    mapSprite.alpha = 0.5
+
+    this.addChild(mapSprite)
   }
+
 
   public Start(): void {
     if (this._mapArea) {
@@ -82,7 +92,7 @@ export class MapPanel extends Graphics {
         .to(this._mapArea, { alpha: 1.0 })
 
         .call(() => {
-          this._status = 'fix'
+          this._status = 'toFix'
         })
     }
     if (AppManager) {
@@ -96,10 +106,17 @@ export class MapPanel extends Graphics {
     if (this.latValue) {
       this.dispLatValue = MapPanel.getRandomString(this._rasterMap.lat, this.dispLatCursor)
       this.latValue.text = this.dispLatValue
-      if (this._status === 'random') {
-
-      } else {
+      this.dispLngValue = MapPanel.getRandomString(this._rasterMap.lng, this.dispLngCursor)
+      this.lngValue.text = this.dispLngValue
+    }
+    if (this._status === 'random') {
+    } else if (this._status === 'toFix') {
+      if (AppManager.app) {
+        // if (AppManager.app.ticker.lastTime > this.prevTime + 50) {
+        //   this.prevTime = AppManager.app.ticker.lastTime
         this.dispLatCursor += 1;
+        this.dispLngCursor += 1;
+        // }
       }
 
     }

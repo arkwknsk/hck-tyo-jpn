@@ -209,13 +209,13 @@ export class AppManager {
         id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
 
       }
-      // rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+      rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
       this.rasterMaps.push(rasterMap)
       // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
 
     console.log("[Main]: After createMapCopyCanvas")
-    this.addRasterMap()
+    // this.addRasterMap()
 
     this.addMapPanel()
 
@@ -251,7 +251,7 @@ export class AppManager {
       const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
       cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
       cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
+      cacheCanvasElement.setAttribute("style", `display:none;position:absolute;top:1080px;width:1000px;left:0px;`);
 
       resolve()
     })
@@ -264,7 +264,7 @@ export class AppManager {
       const mapID = `map${index}`
       mapElement.setAttribute("id", mapID)
       const left = 0
-      mapElement.setAttribute("style", `position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
+      mapElement.setAttribute("style", `display:none;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
 
       AppManager.map = new Map({
         "container": mapID,
@@ -297,8 +297,8 @@ export class AppManager {
                 // document.body.appendChild(img)
 
                 // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                document.body.removeChild(mapElement)
+                // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+                // document.body.removeChild(mapElement)
                 resolve(img)
                 // document.body.appendChild(cacheCanvasElement)
               }
@@ -361,7 +361,7 @@ export class AppManager {
 
       const cols = [4, 6, 8, 6, 4]
       const panelSize = (ScreenHelper.UNIT * 6)
-      const topMargin = ScreenHelper.UNIT * 3
+      const topMargin = ScreenHelper.UNIT * 2
       const betweenMargin = (ScreenHelper.UNIT * 5)
       const betweenMarginY = (ScreenHelper.UNIT * 4)
 
