@@ -123,7 +123,7 @@ export class AppManager {
     });
 
     //FPS
-    AppManager.app.ticker.maxFPS = 15;
+    AppManager.app.ticker.maxFPS = 30;
 
     const app = document.getElementById('app');
     if (app) {
@@ -151,9 +151,11 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
     const grids = ScreenHelper.GetGrids()
-    if (AppManager.gridGraphics) AppManager.gridGraphics.addChild(grids)
-
-
+    // const layoutGrid = ScreenHelper.GetLayoutGrid)
+    if (AppManager.gridGraphics) {
+      AppManager.gridGraphics.addChild(grids)
+      AppManager.gridGraphics.addChild(ScreenHelper.GetLayoutGrid())
+    }
     const message = new Text(
       'HCK/TYO/JPN',
       {
