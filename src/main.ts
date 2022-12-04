@@ -8,6 +8,7 @@ import { Context } from './Context';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 import { MathUtil } from './MathUtil'
+import { MapPanel } from './MapPanel'
 
 import './main.css';
 import './reset.css';
@@ -16,7 +17,7 @@ import './reset.css';
  * Main Class
  */
 export class AppManager {
-  private static app: Application | undefined
+  public static app: Application | undefined
   private static graphics: Graphics | undefined
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
@@ -208,15 +209,17 @@ export class AppManager {
         id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
 
       }
-      rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+      // rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
       this.rasterMaps.push(rasterMap)
-      console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
+      // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
 
     console.log("[Main]: After createMapCopyCanvas")
     this.addRasterMap()
 
-    AppManager.mapGraphics.alpha = 0.5
+    this.addMapPanel()
+
+    // AppManager.mapGraphics.alpha = 0.5
 
   }
 
@@ -329,7 +332,7 @@ export class AppManager {
 
         loadSprite.y = marginY + Math.floor(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.floor(i / cols)
         // loadSprite.y = 100
-        console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
+        // console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
 
         loadSprite.width = Context.MAP_WIDTH * 0.75
         loadSprite.height = Context.MAP_HEIGHT * 0.75
@@ -344,6 +347,47 @@ export class AppManager {
     // throttle the frames-per-second to 30
     gsap.ticker.fps(30);
     const tl = gsap.timeline({})
+  }
+
+  static addMapPanel() {
+    if (!AppManager.mapGraphics) return
+    if (!AppManager.rasterMaps) return
+
+    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+      const mapPanel = new MapPanel(this.rasterMaps[i])
+
+      const indexX = (i % Context.MAPS_COLS)
+      const indexY = Math.floor(i / Context.MAPS_COLS)
+
+      const cols = [4, 6, 8, 6, 4]
+      const panelSize = (ScreenHelper.UNIT * 6)
+      const topMargin = ScreenHelper.UNIT * 3
+      const betweenMargin = (ScreenHelper.UNIT * 5)
+      const betweenMarginY = (ScreenHelper.UNIT * 4)
+
+      if (indexX < cols[0]) {
+        mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX
+      }
+      else if (indexX < cols[0] + cols[1]) {
+        mapPanel.x = ScreenHelper.LEFT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - cols[0]) + betweenMargin * (indexX - cols[0])
+      }
+      else if (indexX < cols[0] + cols[1] + cols[2]) {
+        mapPanel.x = ScreenHelper.FRONT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 4 + panelSize * (indexX - (cols[0] + cols[1])) + betweenMargin * (indexX - (cols[0] + cols[1]))
+      }
+      else if (indexX < cols[0] + cols[1] + cols[2] + cols[3]) {
+        mapPanel.x = ScreenHelper.RIGHT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - (cols[0] + cols[1] + cols[2])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2]))
+      }
+      else {
+        mapPanel.x = ScreenHelper.BACK_SCREEN_RIGHT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * (indexX - (cols[0] + cols[1] + cols[2] + cols[3])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2] + cols[3]))
+      }
+
+      mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
+      // console.log(`[Main:addMapPanel]: ${indexX} ${ScreenHelper.BACK_SCREEN_LEFT_MARGIN}`)
+
+      AppManager.mapGraphics.addChild(mapPanel)
+      mapPanel.Start()
+    }
+
   }
 
 

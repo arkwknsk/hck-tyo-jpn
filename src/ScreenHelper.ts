@@ -13,6 +13,12 @@ export class ScreenHelper {
   public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN
   public static BACK_SCREEN_LEFT: number = ScreenHelper.RIGHT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN
 
+  public static BACK_SCREEN_LEFT_MARGIN: number = 0
+  public static BACK_SCREEN_RIGHT_MARGIN: number = 0
+  public static LEFT_SCREEN_LEFT_MARGIN: number = 0
+  public static FRONT_SCREEN_LEFT_MARGIN: number = 0
+  public static RIGHT_SCREEN_LEFT_MARGIN: number = 0
+
   public static DIVISIONS: number = 32
   public static UNIT: number = Context.STAGE_HEIGHT / this.DIVISIONS
 
@@ -113,32 +119,32 @@ export class ScreenHelper {
     //垂直方向に分割
 
     //BACK(LEFT)
-    g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, 0, unit);
+    [g, this.BACK_SCREEN_LEFT_MARGIN] = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, 0, unit);
 
     //LEFT
-    g = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.LEFT_SCREEN_LEFT, unit);
+    [g, this.LEFT_SCREEN_LEFT_MARGIN] = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.LEFT_SCREEN_LEFT, unit);
 
     //FRONT
-    g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_SCREEN, ScreenHelper.FRONT_SCREEN_LEFT, unit);
+    [g, this.FRONT_SCREEN_LEFT_MARGIN] = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_SCREEN, ScreenHelper.FRONT_SCREEN_LEFT, unit);
 
     //RIGHT
-    g = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.RIGHT_SCREEN_LEFT, unit);
+    [g, this.RIGHT_SCREEN_LEFT_MARGIN] = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.RIGHT_SCREEN_LEFT, unit);
 
     //BACK(RIGHT)
-    g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, ScreenHelper.BACK_SCREEN_LEFT, unit);
+    [g, this.BACK_SCREEN_RIGHT_MARGIN] = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, ScreenHelper.BACK_SCREEN_LEFT, unit);
 
     g.alpha = 0.5
     return g
   }
 
 
-  static GetLayoutGridByScreen(g: Graphics, screenWidth: number, left: number, unit: number): Graphics {
+  static GetLayoutGridByScreen(g: Graphics, screenWidth: number, left: number, unit: number): [Graphics, number] {
     const divisionsX = Math.floor(screenWidth / unit)
     const marginLeft = left + (screenWidth - (Math.floor(screenWidth / unit) * unit)) / 2
     for (let i = 0; i <= divisionsX; i++) {
       g.lineStyle(1, 0x66aaFF).moveTo(marginLeft + unit * i, 0).lineTo(marginLeft + unit * i, Context.STAGE_HEIGHT)
     }
 
-    return g
+    return [g, marginLeft]
   }
 }
