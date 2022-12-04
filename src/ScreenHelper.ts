@@ -11,6 +11,7 @@ export class ScreenHelper {
   public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_SCREEN / 2;
   public static FRONT_SCREEN_LEFT: number = ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
   public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN;
+  public static BACK_SCREEN_LEFT: number = ScreenHelper.RIGHT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
 
   /**
    * NEORT++用のスクリーンエリア
@@ -110,27 +111,19 @@ export class ScreenHelper {
     //垂直方向に分割
 
     //BACK(LEFT)
-    let divisionsX = ScreenHelper.LARGE_AREA / unit
-    const width = ScreenHelper.LARGE_AREA / divisionsX
-    let marginLeft = (ScreenHelper.LARGE_AREA - (Math.floor(ScreenHelper.LARGE_AREA / unit) * unit)) / 2
-    // console.log(`GetLayoutGrid divisionsX:${divisionsX} width:${width} marginLeft:${marginLeft}`)
-
-    for (let i = 0; i < divisionsX; i++) {
-      g.lineStyle(1, 0x66aaFF).moveTo(marginLeft + width * i, 0).lineTo(marginLeft + width * i, Context.STAGE_HEIGHT)
-    }
+    g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, 0, unit);
 
     //LEFT
-    divisionsX = Math.floor(ScreenHelper.SIDE_SCREEN / unit)
-    marginLeft = ScreenHelper.LEFT_SCREEN_LEFT + (ScreenHelper.SIDE_SCREEN - (Math.floor(ScreenHelper.SIDE_SCREEN / unit) * unit)) / 2
-    for (let i = 0; i < divisionsX; i++) {
-      g.lineStyle(1, 0x66aaFF).moveTo(marginLeft + unit * i, 0).lineTo(marginLeft + unit * i, Context.STAGE_HEIGHT)
-    }
+    g = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.LEFT_SCREEN_LEFT, unit);
 
     //FRONT
     g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_SCREEN, ScreenHelper.FRONT_SCREEN_LEFT, unit);
 
     //RIGHT
     g = this.GetLayoutGridByScreen(g, ScreenHelper.SIDE_SCREEN, ScreenHelper.RIGHT_SCREEN_LEFT, unit);
+
+    //BACK(RIGHT)
+    g = this.GetLayoutGridByScreen(g, ScreenHelper.LARGE_AREA, ScreenHelper.BACK_SCREEN_LEFT, unit);
 
     g.alpha = 0.5
     return g
