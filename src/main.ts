@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture, Ticker } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -16,12 +16,12 @@ import './reset.css';
  * Main Class
  */
 export class AppManager {
-  private app: Application | undefined
+  private static app: Application | undefined
   private static graphics: Graphics | undefined
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
 
-  private stats: Stats;
+  private static stats: Stats;
 
   private static map: Map | undefined
 
@@ -37,14 +37,14 @@ export class AppManager {
   };
 
   private constructor() {
-    this.stats = Stats()
+    AppManager.stats = Stats()
   }
 
 
   static init = async () => {
-    const appManager = new AppManager()
-    appManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(appManager.stats.dom);
+    new AppManager()
+    AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild(AppManager.stats.dom);
     const pane = new Tweakpane({
       title: "HCK/TYO/JPN",
     });
@@ -108,7 +108,11 @@ export class AppManager {
       step: 1.0
     });
 
-    appManager.app = new Application({
+    this.initPIXI()
+  }
+
+  static async initPIXI(): Promise<void> {
+    AppManager.app = new Application({
       width: Context.STAGE_WIDTH,
       height: Context.STAGE_HEIGHT,
       backgroundColor: '#000000',
@@ -118,11 +122,14 @@ export class AppManager {
       resolution: 1,
     });
 
+    //FPS
+    AppManager.app.ticker.maxFPS = 15;
+
     const app = document.getElementById('app');
     if (app) {
-      app.appendChild(appManager.app.view as HTMLCanvasElement)
+      app.appendChild(AppManager.app.view as HTMLCanvasElement)
       console.log("[Main]: Added PIXI")
-      appManager.app.stage.sortableChildren = true
+      AppManager.app.stage.sortableChildren = true
     }
 
     await Assets.load({
@@ -136,13 +143,13 @@ export class AppManager {
 
 
     AppManager.mapGraphics = new Graphics()
-    appManager.app.stage.addChild(AppManager.mapGraphics)
+    AppManager.app.stage.addChild(AppManager.mapGraphics)
 
     AppManager.graphics = new Graphics()
-    appManager.app.stage.addChild(AppManager.graphics)
+    AppManager.app.stage.addChild(AppManager.graphics)
 
     AppManager.gridGraphics = new Graphics()
-    appManager.app.stage.addChild(AppManager.gridGraphics)
+    AppManager.app.stage.addChild(AppManager.gridGraphics)
     const grids = ScreenHelper.GetGrids()
     if (AppManager.gridGraphics) AppManager.gridGraphics.addChild(grids)
 
@@ -178,12 +185,12 @@ export class AppManager {
     message2.y = 110
     AppManager.graphics.addChild(message2);
 
-    appManager.app.ticker.add(() => {
-      appManager.stats.begin();
+    AppManager.app.ticker.add(() => {
+      AppManager.stats.begin();
 
       AppManager.update();
 
-      appManager.stats.end();
+      AppManager.stats.end();
     });
 
 
@@ -332,6 +339,8 @@ export class AppManager {
   }
 
   static initTimeline(): void {
+    // throttle the frames-per-second to 30
+    gsap.ticker.fps(30);
     const tl = gsap.timeline({})
   }
 
