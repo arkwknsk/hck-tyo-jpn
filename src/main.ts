@@ -1,3 +1,4 @@
+import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
 import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
@@ -6,6 +7,7 @@ import Blank from './assets/o186ulfx6.json';
 import { Context } from './Context';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
+import { MathUtil } from './MathUtil'
 
 import './main.css';
 import './reset.css';
@@ -16,6 +18,8 @@ import './reset.css';
 export class AppManager {
   private app: Application | undefined
   private static graphics: Graphics | undefined
+  private static mapGraphics: Graphics | undefined
+  private static gridGraphics: Graphics | undefined
 
   private stats: Stats;
 
@@ -122,25 +126,33 @@ export class AppManager {
     }
 
     await Assets.load({
+      data: {
+        weights: ['Medium', 'Normal', 'Light'], // only loads the weight
+      },
       src: "Inter-VariableFont_slnt,wght.ttf",
     }
     );
     console.log("[Main]: Loaded fonts")
 
-    AppManager.graphics = new Graphics()
-    // const areaGraphics = ScreenHelper.GetScreenArea()
-    // AppManager.graphics.addChild(areaGraphics)
-    const grids = ScreenHelper.GetGrids()
-    if (AppManager.graphics) AppManager.graphics.addChild(grids)
 
+    AppManager.mapGraphics = new Graphics()
+    appManager.app.stage.addChild(AppManager.mapGraphics)
+
+    AppManager.graphics = new Graphics()
     appManager.app.stage.addChild(AppManager.graphics)
+
+    AppManager.gridGraphics = new Graphics()
+    appManager.app.stage.addChild(AppManager.gridGraphics)
+    const grids = ScreenHelper.GetGrids()
+    if (AppManager.gridGraphics) AppManager.gridGraphics.addChild(grids)
+
 
     const message = new Text(
       'HCK/TYO/JPN',
       {
         fontFamily: "Inter",
         // fontFamily: "DIN Al",
-        fontWeight: "600",
+        fontWeight: "500",
         fill: 0xffffff,
         fontSize: 120,
         letterSpacing: -0.25
@@ -155,7 +167,7 @@ export class AppManager {
       {
         fontFamily: "Inter",
         // fontFamily: "DIN Alternate Bold",
-        fontWeight: "700",
+        fontWeight: "300",
         fill: 0xffffff,
         fontSize: 120,
         letterSpacing: -0.25
@@ -165,6 +177,16 @@ export class AppManager {
     message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
     message2.y = 110
     AppManager.graphics.addChild(message2);
+
+    appManager.app.ticker.add(() => {
+      appManager.stats.begin();
+
+      AppManager.update();
+
+      appManager.stats.end();
+    });
+
+
     const layers = this.filterLayer()
     // console.debug(layers);
     Blank.layers = layers
@@ -174,7 +196,7 @@ export class AppManager {
     this.rasterMaps = []
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
       var rasterMap: RasterMap = {
-        id: i, lat: 35.6895014 + Math.random() * i * 0.025, lng: 139.6917337 + Math.random() * i * 0.025,
+        id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
 
       }
       rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
@@ -184,6 +206,9 @@ export class AppManager {
 
     console.log("[Main]: After createMapCopyCanvas")
     this.addRasterMap()
+
+    AppManager.mapGraphics.alpha = 0.5
+
   }
 
   /**
@@ -280,33 +305,42 @@ export class AppManager {
 
   static addRasterMap() {
     let i = 0
-    const cols = 42
-    const rows = 3
-    const scale = 0.75
+    const cols = Context.MAPS_COLS
+    const rows = Context.MAPS_ROWS
+    const scale = 0.5
     const marginY = (Context.STAGE_HEIGHT - Context.MAP_HEIGHT * scale * rows) / (rows + 1)
-    const marginX = 45
+    const marginX = (Context.STAGE_WIDTH - Context.MAP_WIDTH * scale * cols) / (cols + 1)
     AppManager.rasterMaps.forEach(item => {
       console.log("[Main] addRasterMap")
-      if (AppManager.graphics) {
+      if (AppManager.mapGraphics) {
         const loadTexture = new Texture(new BaseTexture(item.image))
         const loadSprite = new Sprite(loadTexture)
         // loadSprite.anchor.set(0.5)
         loadSprite.x = marginX + (i % cols) * Context.MAP_WIDTH * scale + marginX * (i % cols)
 
-        loadSprite.y = marginY + Math.round(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.round(i / cols)
-        console.log(`[Main] addRasterMap x:${loadSprite.x} ${i % cols} , ${loadSprite.y} ${marginY}`)
+        loadSprite.y = marginY + Math.floor(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.floor(i / cols)
+        // loadSprite.y = 100
+        console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
 
         loadSprite.width = Context.MAP_WIDTH * 0.75
         loadSprite.height = Context.MAP_HEIGHT * 0.75
-        AppManager.graphics.addChild(loadSprite)
+        AppManager.mapGraphics.addChild(loadSprite)
       }
 
       i++
     });
   }
 
-}
+  static initTimeline(): void {
+    const tl = gsap.timeline({})
+  }
 
+
+  static update(): void {
+
+  }
+
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   console.log("[Main.ts]: DOMContentLoaded")

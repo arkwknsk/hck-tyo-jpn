@@ -17,8 +17,9 @@
   "dependencies": {
     "@pixi/loaders": "^6.5.8",
     "@tweakpane/core": "^1.1.0",
-    "pixi.js": "^7.0.4",
+    "gsap": "^3.11.3",
     "maplibre-gl": "^2.4.0",
+    "pixi.js": "^7.0.4",
     "three": "^0.146.0",
     "tweakpane": "^2.0.0"
   }
