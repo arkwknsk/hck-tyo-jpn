@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture, Ticker } from 'pixi.js';
+import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -8,6 +8,7 @@ import { Context } from './Context';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 import { MathUtil } from './MathUtil'
+import { MapPanel } from './MapPanel'
 
 import './main.css';
 import './reset.css';
@@ -16,7 +17,7 @@ import './reset.css';
  * Main Class
  */
 export class AppManager {
-  private static app: Application | undefined
+  public static app: Application | undefined
   private static graphics: Graphics | undefined
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
@@ -123,7 +124,7 @@ export class AppManager {
     });
 
     //FPS
-    AppManager.app.ticker.maxFPS = 15;
+    AppManager.app.ticker.maxFPS = 30;
 
     const app = document.getElementById('app');
     if (app) {
@@ -151,9 +152,11 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
     const grids = ScreenHelper.GetGrids()
-    if (AppManager.gridGraphics) AppManager.gridGraphics.addChild(grids)
-
-
+    const layoutGrid = ScreenHelper.GetLayoutGrid()
+    // if (AppManager.gridGraphics) {
+    //   AppManager.gridGraphics.addChild(grids)
+    // AppManager.gridGraphics.addChild(ScreenHelper.GetLayoutGrid())
+    // }
     const message = new Text(
       'HCK/TYO/JPN',
       {
@@ -208,13 +211,15 @@ export class AppManager {
       }
       rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
       this.rasterMaps.push(rasterMap)
-      console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
+      // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
 
     console.log("[Main]: After createMapCopyCanvas")
-    this.addRasterMap()
+    // this.addRasterMap()
 
-    AppManager.mapGraphics.alpha = 0.5
+    this.addMapPanel()
+
+    // AppManager.mapGraphics.alpha = 0.5
 
   }
 
@@ -243,10 +248,10 @@ export class AppManager {
 
   static initMap(): Promise<void> {
     return new Promise<void>((resolve) => {
-      const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
-      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
-      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
+      // const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
+      // cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
+      // cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
+      // cacheCanvasElement.setAttribute("style", `display:none;position:absolute;top:1080px;width:1000px;left:0px;`);
 
       resolve()
     })
@@ -259,7 +264,7 @@ export class AppManager {
       const mapID = `map${index}`
       mapElement.setAttribute("id", mapID)
       const left = 0
-      mapElement.setAttribute("style", `position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
+      mapElement.setAttribute("style", `z-index:-1000;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
 
       AppManager.map = new Map({
         "container": mapID,
@@ -292,8 +297,8 @@ export class AppManager {
                 // document.body.appendChild(img)
 
                 // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                document.body.removeChild(mapElement)
+                // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+                // document.body.removeChild(mapElement)
                 resolve(img)
                 // document.body.appendChild(cacheCanvasElement)
               }
@@ -327,7 +332,7 @@ export class AppManager {
 
         loadSprite.y = marginY + Math.floor(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.floor(i / cols)
         // loadSprite.y = 100
-        console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
+        // console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
 
         loadSprite.width = Context.MAP_WIDTH * 0.75
         loadSprite.height = Context.MAP_HEIGHT * 0.75
@@ -341,7 +346,48 @@ export class AppManager {
   static initTimeline(): void {
     // throttle the frames-per-second to 30
     gsap.ticker.fps(30);
-    const tl = gsap.timeline({})
+    // const tl = gsap.timeline({})
+  }
+
+  static addMapPanel() {
+    if (!AppManager.mapGraphics) return
+    if (!AppManager.rasterMaps) return
+
+    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+      const mapPanel = new MapPanel(this.rasterMaps[i])
+
+      const indexX = (i % Context.MAPS_COLS)
+      const indexY = Math.floor(i / Context.MAPS_COLS)
+
+      const cols = [4, 6, 8, 6, 4]
+      const panelSize = (ScreenHelper.UNIT * 6)
+      const topMargin = ScreenHelper.UNIT * 2
+      const betweenMargin = (ScreenHelper.UNIT * 5)
+      const betweenMarginY = (ScreenHelper.UNIT * 4)
+
+      if (indexX < cols[0]) {
+        mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX
+      }
+      else if (indexX < cols[0] + cols[1]) {
+        mapPanel.x = ScreenHelper.LEFT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - cols[0]) + betweenMargin * (indexX - cols[0])
+      }
+      else if (indexX < cols[0] + cols[1] + cols[2]) {
+        mapPanel.x = ScreenHelper.FRONT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 4 + panelSize * (indexX - (cols[0] + cols[1])) + betweenMargin * (indexX - (cols[0] + cols[1]))
+      }
+      else if (indexX < cols[0] + cols[1] + cols[2] + cols[3]) {
+        mapPanel.x = ScreenHelper.RIGHT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - (cols[0] + cols[1] + cols[2])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2]))
+      }
+      else {
+        mapPanel.x = ScreenHelper.BACK_SCREEN_RIGHT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * (indexX - (cols[0] + cols[1] + cols[2] + cols[3])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2] + cols[3]))
+      }
+
+      mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
+      // console.log(`[Main:addMapPanel]: ${indexX} ${ScreenHelper.BACK_SCREEN_LEFT_MARGIN}`)
+
+      AppManager.mapGraphics.addChild(mapPanel)
+      mapPanel.Start()
+    }
+
   }
 
 
