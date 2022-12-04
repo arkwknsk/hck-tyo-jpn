@@ -8,10 +8,13 @@ export class ScreenHelper {
   public static LARGE_SCREEN: number = 3098
   public static SIDE_SCREEN: number = 2408
 
-  public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_SCREEN / 2;
-  public static FRONT_SCREEN_LEFT: number = ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
-  public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN;
-  public static BACK_SCREEN_LEFT: number = ScreenHelper.RIGHT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN;
+  public static LEFT_SCREEN_LEFT: number = ScreenHelper.LARGE_SCREEN / 2
+  public static FRONT_SCREEN_LEFT: number = ScreenHelper.LEFT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN
+  public static RIGHT_SCREEN_LEFT: number = ScreenHelper.FRONT_SCREEN_LEFT + ScreenHelper.LARGE_SCREEN
+  public static BACK_SCREEN_LEFT: number = ScreenHelper.RIGHT_SCREEN_LEFT + ScreenHelper.SIDE_SCREEN
+
+  public static DIVISIONS: number = 32
+  public static UNIT: number = Context.STAGE_HEIGHT / this.DIVISIONS
 
   /**
    * NEORT++用のスクリーンエリア
@@ -99,13 +102,12 @@ export class ScreenHelper {
     let g = new Graphics()
 
     //最小グリッドの算出
-    const divisions = 36
-    const unit = Context.STAGE_HEIGHT / divisions
+    const unit = Context.STAGE_HEIGHT / this.DIVISIONS
     // console.log(`GetLayoutGrid height:${unit}`)
 
     //水平方向に分割
-    for (let i = 0; i < divisions; i++) {
-      g.lineStyle(1, 0x66aaFF).moveTo(0, unit * i).lineTo(Context.STAGE_WIDTH, unit * i)
+    for (let i = 0; i < this.DIVISIONS; i++) {
+      g.lineStyle(1, 0x66aaFF).moveTo(0, this.UNIT * i).lineTo(Context.STAGE_WIDTH, this.UNIT * i)
     }
 
     //垂直方向に分割
