@@ -21,7 +21,7 @@ export class MapPanel extends Graphics {
   private dispLngCursor: number = 0
   private dispLngCursorStep: number = 0
   private dispLngValue: string = ''
-  private counter: number = 0
+  // private counter: number = 0
 
   public constructor(rasterMaps: RasterMap) {
     super();
@@ -59,6 +59,7 @@ export class MapPanel extends Graphics {
 
     this.latValue = new Text('', style);
     this.latValue.x = 0
+    this.latValue.y = ScreenHelper.UNIT / 2
     this.latValue.text = this._rasterMap.lat.toString()
     this.addChild(this.latValue);
 
@@ -71,7 +72,7 @@ export class MapPanel extends Graphics {
 
     this.lngValue = new Text('', style);
     this.lngValue.x = 0
-    this.lngValue.y = 18
+    this.lngValue.y = ScreenHelper.UNIT / 2 + 18
     this.lngValue.text = this._rasterMap.lng.toString()
     this.addChild(this.lngValue);
 
@@ -90,20 +91,18 @@ export class MapPanel extends Graphics {
 
   public Start(): void {
     if (this.mapSprite) {
-      this.counter = 0
+      // this.counter = 0
       // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
-      gsap.timeline({ defaults: { delay: 0, uration: 1.0 } })
+      gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
         .from(this, { counter: 0 })
         .to(this, {
           counter: 1, duration: 2.0, onComplete: () => {
-            console.log('toFix')
             this._status = 'toFix'
           }
         })
         .from(this, { counter: 0 })
         .to(this, {
-          counter: 1, duration: 0.5, onComplete: () => {
-            console.log('map')
+          counter: 1, duration: 0.25, onComplete: () => {
             this._status = 'map'
           }
         })

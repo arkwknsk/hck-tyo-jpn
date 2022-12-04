@@ -1,14 +1,15 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
+import { Application, Assets, BaseTexture, Graphics, Sprite, Texture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
-import Tweakpane from "tweakpane";
+// import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
 import { Context } from './Context';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 import { MathUtil } from './MathUtil'
 import { MapPanel } from './MapPanel'
+import { Title } from './Title'
 
 import './main.css';
 import './reset.css';
@@ -21,6 +22,8 @@ export class AppManager {
   private static graphics: Graphics | undefined
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
+  private static titleText: Title | undefined
+  private static mapPanels: MapPanel[] | undefined
 
   private static stats: Stats;
 
@@ -45,11 +48,7 @@ export class AppManager {
   static init = async () => {
     new AppManager()
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(AppManager.stats.dom);
-    const pane = new Tweakpane({
-      title: "HCK/TYO/JPN",
-    });
-
+    // document.body.appendChild(AppManager.stats.dom);
 
     /*
     const style = {
@@ -102,13 +101,18 @@ export class AppManager {
     };
 */
 
+    /*
+    const pane = new Tweakpane({
+      title: "HCK/TYO/JPN",
+    });
+
 
     pane.addInput(AppManager.INPUTS, 'h', {
       min: 0,
       max: 360,
       step: 1.0
     });
-
+    */
     this.initPIXI()
   }
 
@@ -120,7 +124,7 @@ export class AppManager {
 
       antialias: true,
       autoDensity: true, // !!!
-      resolution: 1,
+      resolution: 2,
     });
 
     //FPS
@@ -151,42 +155,14 @@ export class AppManager {
 
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
-    const grids = ScreenHelper.GetGrids()
-    const layoutGrid = ScreenHelper.GetLayoutGrid()
-    // if (AppManager.gridGraphics) {
-    //   AppManager.gridGraphics.addChild(grids)
-    // AppManager.gridGraphics.addChild(ScreenHelper.GetLayoutGrid())
-    // }
-    const message = new Text(
-      'HCK/TYO/JPN',
-      {
-        fontFamily: "Inter",
-        // fontFamily: "DIN Al",
-        fontWeight: "500",
-        fill: 0xffffff,
-        fontSize: 120,
-        letterSpacing: -0.25
-        , align: 'left',
-      }
-    );
-    message.x = ScreenHelper.FRONT_SCREEN_LEFT
-    AppManager.graphics.addChild(message);
 
-    const message2 = new Text(
-      'LAT: 35.7 ',
-      {
-        fontFamily: "Inter",
-        // fontFamily: "DIN Alternate Bold",
-        fontWeight: "300",
-        fill: 0xffffff,
-        fontSize: 120,
-        letterSpacing: -0.25
-        , align: 'left',
-      }
-    );
-    message2.x = ScreenHelper.LEFT_SCREEN_LEFT;
-    message2.y = 110
-    AppManager.graphics.addChild(message2);
+    ScreenHelper.GetGrids()
+    // const layoutGrid = ScreenHelper.GetLayoutGrid()
+    ScreenHelper.GetLayoutGrid()
+    if (AppManager.gridGraphics) {
+      // AppManager.gridGraphics.addChild(grids)
+      // AppManager.gridGraphics.addChild(layoutGrid)
+    }
 
     AppManager.app.ticker.add(() => {
       AppManager.stats.begin();
@@ -197,12 +173,18 @@ export class AppManager {
     });
 
 
+    this.titleText = new Title()
+    this.titleText.x = ScreenHelper.FRONT_SCREEN_LEFT + (ScreenHelper.LARGE_SCREEN - this.titleText.width) / 2
+    this.titleText.y = (Context.STAGE_HEIGHT - this.titleText.height) / 2
+    this.titleText.Start()
+    AppManager.graphics.addChild(this.titleText);
+
     const layers = this.filterLayer()
     // console.debug(layers);
     Blank.layers = layers
 
     console.log("[Main]: Before createMapCopyCanvas")
-    await this.initMap()
+    // await this.initMap()
     this.rasterMaps = []
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
       var rasterMap: RasterMap = {
@@ -215,13 +197,73 @@ export class AppManager {
     }
 
     console.log("[Main]: After createMapCopyCanvas")
-    // this.addRasterMap()
 
-    this.addMapPanel()
 
-    // AppManager.mapGraphics.alpha = 0.5
+    this.mapPanels = this.addMapPanel()
+    let playlist: number[] = []
+    for (let i = 0; i < this.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+    playlist = this.shuffle(playlist)
+    this.titleText.alpha = 0
+
+    for (let time = 0; time < 4; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          map.Start();
+          map.alpha = 1
+        }
+      });
+      await this.sleep(5, () => {
+        console.log('next maps')
+      })
+    }
+
+
+    await this.sleep(5, () => {
+      console.log('next maps')
+    })
+
+    for (let i = 0; i < this.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+    playlist = this.shuffle(playlist)
+
+    const num = 7
+    for (let time = 0; time < num; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          map.Start();
+          map.alpha = 0
+        }
+      });
+      await this.sleep(0.05, () => {
+        console.log('next maps')
+      })
+    }
+
 
   }
+  static shuffle(array: number[]): number[] {
+    for (let i = array.length - 1; i >= 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  static sleep(waitSeconds: number, someFunction: Function) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(someFunction())
+      }, waitSeconds * 1000)
+    })
+  }
+
 
   /**
    * レイヤーの中から建物だけを抽出
@@ -349,12 +391,15 @@ export class AppManager {
     // const tl = gsap.timeline({})
   }
 
-  static addMapPanel() {
-    if (!AppManager.mapGraphics) return
-    if (!AppManager.rasterMaps) return
+  static addMapPanel(): MapPanel[] {
+    if (!AppManager.mapGraphics) return []
+    if (!AppManager.rasterMaps) return []
+
+    let mapPanels: MapPanel[] = []
 
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
       const mapPanel = new MapPanel(this.rasterMaps[i])
+      mapPanel.alpha = 0
 
       const indexX = (i % Context.MAPS_COLS)
       const indexY = Math.floor(i / Context.MAPS_COLS)
@@ -385,8 +430,11 @@ export class AppManager {
       // console.log(`[Main:addMapPanel]: ${indexX} ${ScreenHelper.BACK_SCREEN_LEFT_MARGIN}`)
 
       AppManager.mapGraphics.addChild(mapPanel)
-      mapPanel.Start()
+      mapPanels.push(mapPanel)
+      // mapPanel.Start()
     }
+
+    return mapPanels
 
   }
 
