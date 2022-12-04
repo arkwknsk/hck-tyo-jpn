@@ -1,25 +1,24 @@
 import { AppManager } from './main'
 import { gsap } from 'gsap';
-import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle } from 'pixi.js';
+// import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle } from 'pixi.js';
+import { Graphics, Text, TextStyle } from 'pixi.js';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
-import { Context } from './Context';
-import { MathUtil } from './MathUtil'
+// import { Context } from './Context';
+// import { MathUtil } from './MathUtil'
 
 export class MapPanel extends Graphics {
   private _rasterMap: RasterMap
   private _mapArea: Graphics | undefined
   private _status: string = 'random'
 
-  private types: string[] = []
-  private typeClone: string[] = []
 
   private latValue = new Text()
   private lngValue = new Text()
   private dispLatValue: string = ''
   private dispLatCursor: number = 0
-  private dispLngCursor: number = 0
-  private dispLngValue: string = ''
+  // private dispLngCursor: number = 0
+  // private dispLngValue: string = ''
 
   public constructor(rasterMaps: RasterMap) {
     super();
@@ -74,7 +73,8 @@ export class MapPanel extends Graphics {
 
   public Start(): void {
     if (this._mapArea) {
-      const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
+      // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
+      gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
         .call(() => {
           console.debug('hoge')
         })

@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture, Ticker } from 'pixi.js';
+import { Application, Assets, BaseTexture, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -346,7 +346,7 @@ export class AppManager {
   static initTimeline(): void {
     // throttle the frames-per-second to 30
     gsap.ticker.fps(30);
-    const tl = gsap.timeline({})
+    // const tl = gsap.timeline({})
   }
 
   static addMapPanel() {
