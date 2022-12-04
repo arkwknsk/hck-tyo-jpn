@@ -152,11 +152,11 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
     const grids = ScreenHelper.GetGrids()
-    // const layoutGrid = ScreenHelper.GetLayoutGrid)
-    if (AppManager.gridGraphics) {
-      AppManager.gridGraphics.addChild(grids)
-      AppManager.gridGraphics.addChild(ScreenHelper.GetLayoutGrid())
-    }
+    const layoutGrid = ScreenHelper.GetLayoutGrid()
+    // if (AppManager.gridGraphics) {
+    //   AppManager.gridGraphics.addChild(grids)
+    // AppManager.gridGraphics.addChild(ScreenHelper.GetLayoutGrid())
+    // }
     const message = new Text(
       'HCK/TYO/JPN',
       {
@@ -248,10 +248,10 @@ export class AppManager {
 
   static initMap(): Promise<void> {
     return new Promise<void>((resolve) => {
-      const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
-      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
-      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      cacheCanvasElement.setAttribute("style", `display:none;position:absolute;top:1080px;width:1000px;left:0px;`);
+      // const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
+      // cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
+      // cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
+      // cacheCanvasElement.setAttribute("style", `display:none;position:absolute;top:1080px;width:1000px;left:0px;`);
 
       resolve()
     })
@@ -264,7 +264,7 @@ export class AppManager {
       const mapID = `map${index}`
       mapElement.setAttribute("id", mapID)
       const left = 0
-      mapElement.setAttribute("style", `display:none;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
+      mapElement.setAttribute("style", `z-index:-1000;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
 
       AppManager.map = new Map({
         "container": mapID,
