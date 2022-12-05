@@ -124,7 +124,7 @@ export class AppManager {
 
       antialias: true,
       autoDensity: true, // !!!
-      resolution: 2,
+      resolution: 1,
     });
 
     //FPS
@@ -156,12 +156,11 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
 
-    ScreenHelper.GetGrids()
-    // const layoutGrid = ScreenHelper.GetLayoutGrid()
-    ScreenHelper.GetLayoutGrid()
+    const grids = ScreenHelper.GetGrids()
+    const layoutGrid = ScreenHelper.GetLayoutGrid()
     if (AppManager.gridGraphics) {
-      // AppManager.gridGraphics.addChild(grids)
-      // AppManager.gridGraphics.addChild(layoutGrid)
+      AppManager.gridGraphics.addChild(grids)
+      AppManager.gridGraphics.addChild(layoutGrid)
     }
 
     AppManager.app.ticker.add(() => {
