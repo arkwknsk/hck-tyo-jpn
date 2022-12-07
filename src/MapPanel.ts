@@ -43,8 +43,8 @@ export class MapPanel extends Graphics {
 
 
     const style: TextStyle = new TextStyle({
-      fontFamily: "Inter",
-      fontWeight: "400",
+      fontFamily: "Inter Medium",
+      fontWeight: '500',
       fill: 0xffffff,
       fontSize: 12,
       letterSpacing: 0

@@ -24,8 +24,8 @@ export class Title extends Graphics {
     this.titleText = new Text(
       'HCK/TYO/JPN',
       {
-        fontFamily: "Inter",
-        fontWeight: "400",
+        fontFamily: "Inter Regular",
+        fontWeight: '400',
         fill: 0xffffff,
         fontSize: 120,
         letterSpacing: -0.25

@@ -28,8 +28,11 @@ export class AppManager {
   private static stats: Stats;
 
   private static map: Map | undefined
+  private static largeMap: Map | undefined
 
   private static rasterMaps: RasterMap[]
+
+  private static withoutRoadStyle: StyleSpecification | undefined
 
 
   static readonly INPUTS = {
@@ -48,7 +51,7 @@ export class AppManager {
   static init = async () => {
     new AppManager()
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    // document.body.appendChild(AppManager.stats.dom);
+    document.body.appendChild(AppManager.stats.dom);
 
     /*
     const style = {
@@ -113,7 +116,9 @@ export class AppManager {
       step: 1.0
     });
     */
-    this.initPIXI()
+    await this.initPIXI()
+    await this.createLargeMap()
+    this.initTimeline()
   }
 
   static async initPIXI(): Promise<void> {
@@ -130,20 +135,15 @@ export class AppManager {
     //FPS
     AppManager.app.ticker.maxFPS = 30;
 
-    const app = document.getElementById('app');
+    const app = document.getElementById('app')
     if (app) {
       app.appendChild(AppManager.app.view as HTMLCanvasElement)
       console.log("[Main]: Added PIXI")
       AppManager.app.stage.sortableChildren = true
     }
 
-    await Assets.load({
-      data: {
-        weights: ['Medium', 'Normal', 'Light'], // only loads the weight
-      },
-      src: "Inter-VariableFont_slnt,wght.ttf",
-    }
-    );
+    await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
+    await Assets.load("Inter-Regular.ttf").catch((error) => { console.log(error.message); });;
     console.log("[Main]: Loaded fonts")
 
 
@@ -164,11 +164,16 @@ export class AppManager {
     }
 
     AppManager.app.ticker.add(() => {
-      AppManager.stats.begin();
+      try {
+        if (AppManager.stats) AppManager.stats.begin();
 
-      AppManager.update();
+        AppManager.update();
 
-      AppManager.stats.end();
+        if (AppManager.stats) AppManager.stats.end();
+
+      } catch (error: any) {
+        console.error(error.message)
+      }
     });
 
 
@@ -180,7 +185,10 @@ export class AppManager {
 
     const layers = this.filterLayer()
     // console.debug(layers);
-    Blank.layers = layers
+    // Blank.layers = layers
+    AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
+    AppManager.withoutRoadStyle.layers = layers
+
 
     console.log("[Main]: Before createMapCopyCanvas")
     // await this.initMap()
@@ -198,55 +206,33 @@ export class AppManager {
     console.log("[Main]: After createMapCopyCanvas")
 
 
-    this.mapPanels = this.addMapPanel()
-    let playlist: number[] = []
-    for (let i = 0; i < this.mapPanels.length; i++) {
-      playlist.push(i)
-    }
-    playlist = this.shuffle(playlist)
-    this.titleText.alpha = 0
-
-    for (let time = 0; time < 4; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          map.Start();
-          map.alpha = 1
-        }
-      });
-      await this.sleep(5, () => {
-        console.log('next maps')
-      })
-    }
-
-
-    await this.sleep(5, () => {
-      console.log('next maps')
-    })
-
-    for (let i = 0; i < this.mapPanels.length; i++) {
-      playlist.push(i)
-    }
-    playlist = this.shuffle(playlist)
-
-    const num = 7
-    for (let time = 0; time < num; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          map.Start();
-          map.alpha = 0
-        }
-      });
-      await this.sleep(0.05, () => {
-        console.log('next maps')
-      })
-    }
-
 
   }
+
+  static async createLargeMap(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      var mapElement = document.createElement('div')
+      document.body.appendChild(mapElement);
+      const mapID = `largeMap}`
+      mapElement.setAttribute("id", mapID)
+      mapElement.setAttribute("style", `opacity:0.7;z-index:10;position:absolute;top:0;left:${ScreenHelper.FRONT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
+
+      AppManager.largeMap = new Map({
+        "container": mapID,
+        center: [139.7812967, 35.6954874],
+        zoom: 13,
+        maxZoom: 17.99,
+        minZoom: 4,
+        "pitch": 0,
+        "maxPitch": 85,
+        "bearing": 0,
+        "hash": false,
+        "style": Blank as StyleSpecification
+      });
+
+    })
+  }
+
   static shuffle(array: number[]): number[] {
     for (let i = array.length - 1; i >= 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -317,7 +303,7 @@ export class AppManager {
         "maxPitch": 85,
         "bearing": 0,
         "hash": false,
-        "style": Blank as StyleSpecification
+        "style": AppManager.withoutRoadStyle as StyleSpecification
       });
 
       if (AppManager.map) {
@@ -384,10 +370,64 @@ export class AppManager {
     });
   }
 
-  static initTimeline(): void {
-    // throttle the frames-per-second to 30
+  static async initTimeline(): Promise<void> {
     gsap.ticker.fps(30);
-    // const tl = gsap.timeline({})
+
+    /*
+    this.mapPanels = this.addMapPanel()
+    let playlist: number[] = []
+    for (let i = 0; i < this.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+
+    // throttle the frames-per-second to 30
+    playlist = this.shuffle(playlist)
+    if (this.titleText) this.titleText.alpha = 0
+
+    for (let time = 0; time < 4; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          map.Start();
+          map.alpha = 1
+        }
+      });
+      await this.sleep(5, () => {
+        console.log('next maps')
+      })
+    }
+
+
+    await this.sleep(5, () => {
+      console.log('next maps')
+    })
+
+    for (let i = 0; i < this.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+    playlist = this.shuffle(playlist)
+
+    const num = 7
+    for (let time = 0; time < num; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          // map.Start();
+          // map.alpha = 0
+        }
+      });
+      await this.sleep(0.05, () => {
+        console.log('next maps')
+      })
+    }*/
+
+    const tl = gsap.timeline({}).call(() => {
+      console.log(`[TL] START ${new Date().getTime()}`)
+    })
+      .call(() => { console.log(`[TL] CALL ${new Date().getTime()}`) }, []
+        , "+=5")
   }
 
   static addMapPanel(): MapPanel[] {
@@ -406,7 +446,7 @@ export class AppManager {
       const cols = [4, 6, 8, 6, 4]
       const panelSize = (ScreenHelper.UNIT * 6)
       const topMargin = ScreenHelper.UNIT * 2
-      const betweenMargin = (ScreenHelper.UNIT * 5)
+      const betweenMargin = (ScreenHelper.UNIT * 1)
       const betweenMarginY = (ScreenHelper.UNIT * 4)
 
       if (indexX < cols[0]) {
