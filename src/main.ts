@@ -230,11 +230,12 @@ export class AppManager {
       document.body.appendChild(mapElement);
       const mapID = `largeMap}`
       mapElement.setAttribute("id", mapID)
-      mapElement.setAttribute("style", `opacity:0.7;z-index:10;position:absolute;top:0;left:${ScreenHelper.FRONT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
+      // mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.FRONT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
+      mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.LEFT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN + ScreenHelper.SIDE_SCREEN * 2}px;height:${Context.STAGE_HEIGHT}px;`);
 
       AppManager.largeMap = new Map({
         "container": mapID,
-        center: [139.7812967, 35.6954874],
+        center: [139.7873784, 35.6853717],
         zoom: 4.0,
         maxZoom: 17.99,
         minZoom: 4,
@@ -401,7 +402,7 @@ export class AppManager {
       .call(() => {
         AppManager.largeMap?.jumpTo({ zoom: 13.0, pitch: 0.0 })
       }, []
-        , "+=5"
+        , "+=3"
       )
       .call(() => {
         AppManager.largeMap?.jumpTo({ zoom: 14.0, pitch: 0.0 })
