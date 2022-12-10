@@ -124,7 +124,6 @@ export class AppManager {
     await this.initPIXI()
     await this.initCacheCanvas()
     await this.createLargeMap()
-    await this.createCacheMaps()
     await this.initTimeline()
     // this.mapPanels = this.addMapPanel()
 
@@ -200,7 +199,7 @@ export class AppManager {
   }
 
   static async createCacheMaps(): Promise<void> {
-    const layers = this.filterLayer()
+    const layers = AppManager.filterLayer()
     // console.debug(layers);
     // Blank.layers = layers
     AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
@@ -209,18 +208,17 @@ export class AppManager {
 
     console.log("[Main]: Before createMapCopyCanvas")
     // await this.initMap()
-    this.rasterMaps = []
+    AppManager.rasterMaps = []
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
       var rasterMap: RasterMap = {
         id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
 
       }
-      rasterMap.image = await this.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
-      this.rasterMaps.push(rasterMap)
+      rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+      AppManager.rasterMaps.push(rasterMap)
       // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
-
-    console.log("[Main]: After createMapCopyCanvas")
+    console.log(`[Main]: After createMapCopyCanvas  ${AppManager.timeIndicator.toString()}`)
 
   }
 
@@ -397,6 +395,7 @@ export class AppManager {
     })
       .call(() => {
         AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
+        AppManager.createCacheMaps()
       }, []
         , "0")
       .call(() => {
@@ -409,57 +408,19 @@ export class AppManager {
       }, []
         , "+=3"
       )
+      .call(() => {
+        AppManager.largeMap?.jumpTo({ zoom: 14.0, pitch: 0.0 })
+        console.log(`[TL] addMapPanel ${this.timeIndicator.toString()}`)
+        AppManager.mapPanels = AppManager.addMapPanel()
+      }, []
+        , "+=3"
+      )
+      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
+        , "+=5")
       .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
         , "+=5")
 
-    this.mapPanels = this.addMapPanel()
-    let playlist: number[] = []
-    for (let i = 0; i < this.mapPanels.length; i++) {
-      playlist.push(i)
-    }
 
-    // throttle the frames-per-second to 30
-    playlist = this.shuffle(playlist)
-    if (this.titleText) this.titleText.alpha = 0
-
-    for (let time = 0; time < 4; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          map.Start();
-          map.alpha = 1
-        }
-      });
-      await this.sleep(5, () => {
-        console.log('next maps')
-      })
-    }
-
-
-    await this.sleep(5, () => {
-      console.log('next maps')
-    })
-
-    for (let i = 0; i < this.mapPanels.length; i++) {
-      playlist.push(i)
-    }
-    playlist = this.shuffle(playlist)
-
-    const num = 7
-    for (let time = 0; time < num; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          // map.Start();
-          // map.alpha = 0
-        }
-      });
-      await this.sleep(0.05, () => {
-        console.log('next maps')
-      })
-    }
 
   }
 
@@ -470,7 +431,7 @@ export class AppManager {
     let mapPanels: MapPanel[] = []
 
     for (let i = 0; i < Context.NUMBER_MAPS; i++) {
-      const mapPanel = new MapPanel(this.rasterMaps[i])
+      const mapPanel = new MapPanel(AppManager.rasterMaps[i])
       mapPanel.alpha = 0
 
       const indexX = (i % Context.MAPS_COLS)
@@ -507,6 +468,55 @@ export class AppManager {
     }
 
     return mapPanels
+
+  }
+
+  static async showMapPanel() {
+    if (!AppManager.mapPanels) return
+    let playlist: number[] = []
+    for (let i = 0; i < AppManager.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+
+    playlist = this.shuffle(playlist)
+    if (this.titleText) this.titleText.alpha = 0
+
+    for (let time = 0; time < 4; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          map.Start();
+          map.alpha = 1
+        }
+      });
+      await this.sleep(5, () => {
+        console.log('next maps')
+      })
+    }
+    await this.sleep(5, () => {
+      console.log('next maps')
+    })
+
+    for (let i = 0; i < this.mapPanels.length; i++) {
+      playlist.push(i)
+    }
+    playlist = this.shuffle(playlist)
+
+    const num = 7
+    for (let time = 0; time < num; time++) {
+      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
+      target.forEach(mapIndex => {
+        if (this.mapPanels) {
+          const map = this.mapPanels[mapIndex]
+          // map.Start();
+          // map.alpha = 0
+        }
+      });
+      await this.sleep(0.05, () => {
+        console.log('next maps')
+      })
+    }
 
   }
 

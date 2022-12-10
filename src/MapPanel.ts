@@ -32,6 +32,7 @@ export class MapPanel extends Graphics {
   }
 
   public init() {
+    // console.log(`[MapPanel]: init id:${this._rasterMap.id} this._rasterMap.lat:${this._rasterMap.lat}`)
     this.dispLatCursorStep = this._rasterMap.lat.toString().length / (1.0 * 30)
     this.dispLngCursorStep = this._rasterMap.lng.toString().length / (1.0 * 30)
 
