@@ -238,7 +238,7 @@ export class AppManager {
         zoom: 4.0,
         maxZoom: 17.99,
         minZoom: 4,
-        "pitch": 0,
+        "pitch": 30,
         "maxPitch": 85,
         "bearing": 0,
         "hash": false,
@@ -390,6 +390,27 @@ export class AppManager {
 
     gsap.ticker.fps(30);
 
+    if (!AppManager.largeMap) return
+    const tl = gsap.timeline({}).call(() => {
+      console.log(`[TL] START ${this.timeIndicator.toString()}`)
+    })
+      .call(() => {
+        AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
+      }, []
+        , "0")
+      .call(() => {
+        AppManager.largeMap?.jumpTo({ zoom: 13.0, pitch: 0.0 })
+      }, []
+        , "+=5"
+      )
+      .call(() => {
+        AppManager.largeMap?.jumpTo({ zoom: 14.0, pitch: 0.0 })
+      }, []
+        , "+=3"
+      )
+      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
+        , "+=5")
+
     this.mapPanels = this.addMapPanel()
     let playlist: number[] = []
     for (let i = 0; i < this.mapPanels.length; i++) {
@@ -439,11 +460,6 @@ export class AppManager {
       })
     }
 
-    const tl = gsap.timeline({}).call(() => {
-      console.log(`[TL] START ${this.timeIndicator.toString()}`)
-    })
-      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
-        , "+=5")
   }
 
   static addMapPanel(): MapPanel[] {
