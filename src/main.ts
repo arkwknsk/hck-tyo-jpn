@@ -122,9 +122,12 @@ export class AppManager {
     });
     */
     await this.initPIXI()
+    await this.initCacheCanvas()
     await this.createLargeMap()
-    await this.initTimeline()
     await this.createCacheMaps()
+    await this.initTimeline()
+    // this.mapPanels = this.addMapPanel()
+
   }
 
   static async initPIXI(): Promise<void> {
@@ -288,12 +291,12 @@ export class AppManager {
     return evenValues
   }
 
-  static initMap(): Promise<void> {
+  static initCacheCanvas(): Promise<void> {
     return new Promise<void>((resolve) => {
-      // const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
-      // cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
-      // cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      // cacheCanvasElement.setAttribute("style", `display:none;position:absolute;top:1080px;width:1000px;left:0px;`);
+      const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
+      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
+      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
+      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
 
       resolve()
     })
@@ -303,12 +306,13 @@ export class AppManager {
     return new Promise<HTMLImageElement>((resolve, reject) => {
       var mapElement = document.createElement('div')
       document.body.appendChild(mapElement);
-      const mapID = `map${index}`
+      // const mapID = `map${index}`
+      const mapID = `map-small`
       mapElement.setAttribute("id", mapID)
       const left = 0
       mapElement.setAttribute("style", `z-index:-1000;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
 
-      AppManager.map = new Map({
+      const map = new Map({
         "container": mapID,
         center: [lng, lat],
         zoom: 15,
@@ -318,42 +322,40 @@ export class AppManager {
         "maxPitch": 85,
         "bearing": 0,
         "hash": false,
+        maxTileCacheSize: 0,
         "style": AppManager.withoutRoadStyle as StyleSpecification
       });
 
-      if (AppManager.map) {
-        AppManager.map.once('load', function () {
-          let data: string;
-          var mapElement = document.getElementById(mapID)
-          if (mapElement) {
-            const mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
-            const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
+      map.once('load', () => {
+        let data: string;
+        var mapElement = document.getElementById(mapID)
+        if (mapElement) {
+          let mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
+          const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
 
-            if (cacheCanvasElement) {
-              const cacheCanvasContext = cacheCanvasElement.getContext('2d')
-              if (cacheCanvasContext) {
-                data = mapCanvasElement.toDataURL()
-                // console.log(data)
-                var img = new Image(Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                img.src = data
-                // document.body.appendChild(img)
+          if (cacheCanvasElement) {
+            const cacheCanvasContext = cacheCanvasElement.getContext('2d')
+            if (cacheCanvasContext) {
+              data = mapCanvasElement.toDataURL()
+              // console.log(data)
+              var img = new Image(Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+              img.src = data
+              // document.body.appendChild(img)
 
-                // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                document.body.removeChild(mapElement)
-                resolve(img)
-                // document.body.appendChild(cacheCanvasElement)
-              }
-              else {
-                reject()
-              }
+              // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+              cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+              document.body.removeChild(mapElement)
+              resolve(img)
             }
             else {
               reject()
             }
           }
-        });
-      }
+          else {
+            reject()
+          }
+        }
+      });
     });
   }
 
@@ -390,7 +392,6 @@ export class AppManager {
 
     gsap.ticker.fps(30);
 
-    /*
     this.mapPanels = this.addMapPanel()
     let playlist: number[] = []
     for (let i = 0; i < this.mapPanels.length; i++) {
@@ -438,7 +439,7 @@ export class AppManager {
       await this.sleep(0.05, () => {
         console.log('next maps')
       })
-    }*/
+    }
 
     const tl = gsap.timeline({}).call(() => {
       console.log(`[TL] START ${this.timeIndicator.toString()}`)
@@ -487,7 +488,7 @@ export class AppManager {
 
       AppManager.mapGraphics.addChild(mapPanel)
       mapPanels.push(mapPanel)
-      // mapPanel.Start()
+      mapPanel.Start()
     }
 
     return mapPanels

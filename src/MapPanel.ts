@@ -21,7 +21,7 @@ export class MapPanel extends Graphics {
   private dispLngCursor: number = 0
   private dispLngCursorStep: number = 0
   private dispLngValue: string = ''
-  // private counter: number = 0
+  private counter: number = 0
 
   public constructor(rasterMaps: RasterMap) {
     super();
