@@ -337,14 +337,12 @@ export class AppManager {
             const cacheCanvasContext = cacheCanvasElement.getContext('2d')
             if (cacheCanvasContext) {
               data = mapCanvasElement.toDataURL()
-              // console.log(data)
               var img = new Image(Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
               img.src = data
-              // document.body.appendChild(img)
 
-              // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
               cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
               document.body.removeChild(mapElement)
+              map.remove()
               resolve(img)
             }
             else {
