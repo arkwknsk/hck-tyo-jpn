@@ -10,6 +10,7 @@ import { ScreenHelper } from './ScreenHelper';
 import { MathUtil } from './MathUtil'
 import { MapPanel } from './MapPanel'
 import { Title } from './Title'
+import { TimeIndicator } from './TimeIndicator'
 
 import './main.css';
 import './reset.css';
@@ -24,6 +25,7 @@ export class AppManager {
   private static gridGraphics: Graphics | undefined
   private static titleText: Title | undefined
   private static mapPanels: MapPanel[] | undefined
+  private static timeIndicator: TimeIndicator
 
   private static stats: Stats;
 
@@ -34,6 +36,7 @@ export class AppManager {
 
   private static withoutRoadStyle: StyleSpecification | undefined
 
+  private static startTime: Date;
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -45,6 +48,8 @@ export class AppManager {
 
   private constructor() {
     AppManager.stats = Stats()
+    AppManager.startTime = new Date();
+    AppManager.timeIndicator = new TimeIndicator(AppManager.startTime)
   }
 
 
@@ -118,7 +123,8 @@ export class AppManager {
     */
     await this.initPIXI()
     await this.createLargeMap()
-    this.initTimeline()
+    await this.initTimeline()
+    await this.createCacheMaps()
   }
 
   static async initPIXI(): Promise<void> {
@@ -163,6 +169,8 @@ export class AppManager {
       AppManager.gridGraphics.addChild(layoutGrid)
     }
 
+    AppManager.gridGraphics.addChild(this.timeIndicator)
+
     AppManager.app.ticker.add(() => {
       try {
         if (AppManager.stats) AppManager.stats.begin();
@@ -183,6 +191,12 @@ export class AppManager {
     this.titleText.Start()
     AppManager.graphics.addChild(this.titleText);
 
+
+
+
+  }
+
+  static async createCacheMaps(): Promise<void> {
     const layers = this.filterLayer()
     // console.debug(layers);
     // Blank.layers = layers
@@ -205,8 +219,6 @@ export class AppManager {
 
     console.log("[Main]: After createMapCopyCanvas")
 
-
-
   }
 
   static async createLargeMap(): Promise<void> {
@@ -220,7 +232,7 @@ export class AppManager {
       AppManager.largeMap = new Map({
         "container": mapID,
         center: [139.7812967, 35.6954874],
-        zoom: 13,
+        zoom: 4.0,
         maxZoom: 17.99,
         minZoom: 4,
         "pitch": 0,
@@ -230,6 +242,9 @@ export class AppManager {
         "style": Blank as StyleSpecification
       });
 
+      AppManager.largeMap.on('load', function () {
+        resolve();
+      })
     })
   }
 
@@ -325,7 +340,7 @@ export class AppManager {
 
                 // cacheCanvasContext.drawImage(img, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
                 // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
-                // document.body.removeChild(mapElement)
+                document.body.removeChild(mapElement)
                 resolve(img)
                 // document.body.appendChild(cacheCanvasElement)
               }
@@ -371,6 +386,8 @@ export class AppManager {
   }
 
   static async initTimeline(): Promise<void> {
+    console.log("[Main] initTimeline")
+
     gsap.ticker.fps(30);
 
     /*
@@ -424,9 +441,9 @@ export class AppManager {
     }*/
 
     const tl = gsap.timeline({}).call(() => {
-      console.log(`[TL] START ${new Date().getTime()}`)
+      console.log(`[TL] START ${this.timeIndicator.toString()}`)
     })
-      .call(() => { console.log(`[TL] CALL ${new Date().getTime()}`) }, []
+      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
         , "+=5")
   }
 
@@ -479,7 +496,7 @@ export class AppManager {
 
 
   static update(): void {
-
+    if (this.timeIndicator) this.timeIndicator.update()
   }
 
 }
