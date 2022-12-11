@@ -190,7 +190,7 @@ export class AppManager {
     this.titleText = new Title()
     this.titleText.x = ScreenHelper.FRONT_SCREEN_LEFT + (ScreenHelper.LARGE_SCREEN - this.titleText.width) / 2
     this.titleText.y = (Context.STAGE_HEIGHT - this.titleText.height) / 2
-    this.titleText.Start()
+    this.titleText.visible = false
     AppManager.graphics.addChild(this.titleText);
 
 
@@ -405,6 +405,10 @@ export class AppManager {
     })
       .call(() => {
         // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
+        if (AppManager.titleText) {
+          AppManager.titleText.visible = true
+          AppManager.titleText.Start()
+        }
         AppManager.createCacheMaps()
         AppManager.zoomLargeMap(13.9)
       }, []

@@ -6,49 +6,48 @@ import { Graphics, Text } from 'pixi.js';
 
 export class Title extends Graphics {
   private _status: string = 'random'
-  private titleString: string = 'HCK/TYO/JPN'
+  private readonly TITLE_STRING: string = 'HCK/TYO/JPN'
 
 
-  private titleText = new Text()
+  private titleTexts: Text[]
   private dispValue: string = ''
   private dispCursor: number = 0
-  private dispCursorStep: number = 1
+  private dispCursorStep: number = 0.25
 
   public constructor() {
     super();
+    this.titleTexts = []
 
     this.init()
   }
 
   public init() {
-    this.titleText = new Text(
-      'HCK/TYO/JPN',
-      {
-        fontFamily: "Inter Regular",
-        fontWeight: '400',
-        fill: 0xffffff,
-        fontSize: 120,
-        letterSpacing: -0.25
-        , align: 'left',
-      }
-    );
-    this.addChild(this.titleText);
-    this.alpha = 0
+    for (let i = 0; i < this.TITLE_STRING.length; i++) {
+      const char = this.TITLE_STRING[i];
+      const text = new Text(
+        char,
+        {
+          fontFamily: "Inter Regular",
+          fontWeight: '400',
+          fill: 0xffffff,
+          fontSize: 120,
+          letterSpacing: -0.25
+          , align: 'left',
+        }
+      );
+      text.x = i * 120
+      this.titleTexts.push(text);
+      this.addChild(text);
+    }
+    this.alpha = 1.0
   }
 
   public Start(): void {
     // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
     gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
-      .from(this, { alpha: 0 })
-      .to(this, {
-        alpha: 1, duration: 2.0, onComplete: () => {
-        }
-      })
-      .to(this, {
-        duration: 0.5, delay: 5.0, onComplete: () => {
-          this._status = 'toFix'
-        }
-      })
+      .call(() => {
+        this._status = 'toFix'
+      }, [], "+=3.0")
     if (AppManager) {
       if (AppManager.app) {
         AppManager.app.ticker.add(this.update);
@@ -58,16 +57,23 @@ export class Title extends Graphics {
 
   private update = (): void => {
     if (this._status === 'random' || this._status === 'toFix') {
-      this.dispValue = Title.getRandomString(this.titleString, this.dispCursor)
+      this.dispValue = Title.getRandomString(this.TITLE_STRING, this.dispCursor)
       // console.log(this.dispCursor)
-      this.titleText.text = this.dispValue
+      for (let i = 0; i < this.titleTexts.length; i++) {
+        const text = this.titleTexts[i];
+        text.text = this.dispValue.slice(i, i + 1)
+      }
     }
     if (this._status === 'random') {
     } else if (this._status === 'toFix') {
       if (AppManager.app) {
-        // if (this.dispCursor <= this.titleString.length) {
-        this.dispCursor += this.dispCursorStep;
-        // }
+        if (this.dispCursor <= this.TITLE_STRING.length) {
+          this.dispCursor += this.dispCursorStep;
+          console.log(this.dispCursor)
+
+        } else {
+          AppManager.app.ticker.remove(this.update);
+        }
       }
 
     }
