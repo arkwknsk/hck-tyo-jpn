@@ -234,10 +234,10 @@ export class AppManager {
       AppManager.largeMap = new Map({
         "container": mapID,
         center: [139.7873784, 35.6853717],
-        zoom: 4.0,
+        zoom: 13.0,
         maxZoom: 17.99,
         minZoom: 4,
-        "pitch": 30,
+        "pitch": 0,
         "maxPitch": 85,
         "bearing": 0,
         "hash": false,
@@ -266,6 +266,16 @@ export class AppManager {
     })
   }
 
+  static zoomLargeMap(to: number): void {
+    if (!AppManager.largeMap) return
+    const currentZoom = AppManager.largeMap.getZoom();
+    if (currentZoom < to) {
+      AppManager.largeMap.setZoom(currentZoom + 0.0005)
+    }
+    setTimeout(() => {
+      this.zoomLargeMap(to)
+    }, 1000 / 30);
+  }
 
   /**
    * レイヤーの中から建物だけを抽出
@@ -394,22 +404,24 @@ export class AppManager {
       console.log(`[TL] START ${this.timeIndicator.toString()}`)
     })
       .call(() => {
-        AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
+        // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
         AppManager.createCacheMaps()
+        AppManager.zoomLargeMap(13.9)
       }, []
         , "0")
+      // .call(() => {
+      //   AppManager.largeMap?.jumpTo({ zoom: 13.0 })
+      // }, []
+      //   , "+=3"
+      // )
       .call(() => {
-        AppManager.largeMap?.jumpTo({ zoom: 13.0, pitch: 0.0 })
+        AppManager.largeMap?.jumpTo({ zoom: 14.0 })
+        AppManager.zoomLargeMap(14.9)
       }, []
-        , "+=3"
+        , "+=5"
       )
       .call(() => {
-        AppManager.largeMap?.jumpTo({ zoom: 14.0, pitch: 0.0 })
-      }, []
-        , "+=3"
-      )
-      .call(() => {
-        AppManager.largeMap?.jumpTo({ zoom: 14.0, pitch: 0.0 })
+        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
         console.log(`[TL] addMapPanel ${this.timeIndicator.toString()}`)
         AppManager.mapPanels = AppManager.addMapPanel()
       }, []
