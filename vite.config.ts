@@ -4,7 +4,14 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: './',
   build: {
-    outDir: './dist'
+    outDir: './dist',
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`,
+      }
+    },
+    assetsInlineLimit: 4096 * 100
   },
   server: {
     watch: {
