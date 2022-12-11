@@ -81,18 +81,22 @@ export class ScreenHelper {
     const g = new Graphics()
 
     //Center Cross
-    g.lineStyle(1, 0xFFFF00).moveTo(Context.STAGE_WIDTH / 2, 0).lineTo(Context.STAGE_WIDTH / 2, Context.STAGE_HEIGHT)
-    g.lineStyle(1, 0xFFFF00).moveTo(Context.STAGE_WIDTH / 2 - crossSize, Context.STAGE_HEIGHT / 2).lineTo(Context.STAGE_WIDTH / 2 + crossSize, Context.STAGE_HEIGHT / 2)
+    g.lineStyle(2, 0xFFFF00).moveTo(Context.STAGE_WIDTH / 2, 0).lineTo(Context.STAGE_WIDTH / 2, Context.STAGE_HEIGHT)
+    g.lineStyle(2, 0xFFFF00).moveTo(Context.STAGE_WIDTH / 2 - crossSize, Context.STAGE_HEIGHT / 2).lineTo(Context.STAGE_WIDTH / 2 + crossSize, Context.STAGE_HEIGHT / 2)
 
-    g.lineStyle(1, 0xFF0000)
+    g.lineStyle(2, 0xFF0000)
     // BACK(LEFT)
-    g.drawRect(0, 0, ScreenHelper.LARGE_AREA, Context.STAGE_HEIGHT)
+    // g.drawRect(0, 0, ScreenHelper.LARGE_AREA, Context.STAGE_HEIGHT)
+    g.drawRect(0, 0, 1549, Context.STAGE_HEIGHT)
     // LEFT
-    g.drawRect(ScreenHelper.LEFT_SCREEN_LEFT, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+    // g.drawRect(ScreenHelper.LEFT_SCREEN_LEFT, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+    g.drawRect(ScreenHelper.LEFT_SCREEN_LEFT, 0, 859 + 1549, Context.STAGE_HEIGHT)
     //FRONT
-    g.drawRect(ScreenHelper.FRONT_SCREEN_LEFT, 0, ScreenHelper.LARGE_SCREEN, Context.STAGE_HEIGHT)
+    // g.drawRect(ScreenHelper.FRONT_SCREEN_LEFT, 0, ScreenHelper.LARGE_SCREEN, Context.STAGE_HEIGHT)
+    g.drawRect(ScreenHelper.FRONT_SCREEN_LEFT, 0, 3098, Context.STAGE_HEIGHT)
     //RIGHT
-    g.drawRect(ScreenHelper.RIGHT_SCREEN_LEFT, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+    // g.drawRect(ScreenHelper.RIGHT_SCREEN_LEFT, 0, ScreenHelper.SIDE_SCREEN, Context.STAGE_HEIGHT)
+    g.drawRect(ScreenHelper.RIGHT_SCREEN_LEFT, 0, 859 + 1549, Context.STAGE_HEIGHT)
 
     return g
   }
