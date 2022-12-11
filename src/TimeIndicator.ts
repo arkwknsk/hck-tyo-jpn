@@ -17,6 +17,23 @@ export class TimeIndicator extends Graphics {
     , align: 'center',
   })
 
+  private _diff: number = 0;
+  public get diff(): number {
+    return this._diff;
+  }
+  private _mDiff: number = 0;
+  public get mDiff(): number {
+    return this._mDiff;
+  }
+  private _sDiff: number = 0;
+  public get sDiff(): number {
+    return this._sDiff;
+  }
+  private _msDiff: number = 0;
+  public get msDiff(): number {
+    return this._msDiff;
+  }
+
   public constructor(start: Date) {
     super();
 
@@ -49,16 +66,18 @@ export class TimeIndicator extends Graphics {
   public update = (): void => {
     const now = new Date()
     // debugger
-    const diff = now.getTime() - this._start.getTime();
-    const mDiff = Math.floor(diff / (1000 * 60 * 60))
-    const sDiff = Math.floor((diff - (mDiff * 1000 * 60)) / 1000)
-    const msDiff = Math.floor((diff - (sDiff * 100) * 100))
+    this._diff = now.getTime() - this._start.getTime();
+    this._mDiff = Math.floor(this.diff / (1000 * 60 * 60))
+    this._sDiff = Math.floor((this.diff - (this.mDiff * 1000 * 60)) / 1000)
+    // this._msDiff = Math.floor(((this.diff - this.sDiff) / 100 * 100))
+    this._msDiff = this.diff - (this._sDiff * 1000)
 
-    this.minText.text = TimeIndicator.zeroPadding(mDiff, 2)
-    this.secText.text = TimeIndicator.zeroPadding(sDiff, 2)
-    this.msecText.text = TimeIndicator.zeroPadding(msDiff, 2)
+    this.minText.text = TimeIndicator.zeroPadding(this.mDiff, 2)
+    this.secText.text = TimeIndicator.zeroPadding(this.sDiff, 2)
+    this.msecText.text = TimeIndicator.zeroPadding(this.msDiff, 3)
+    // this.msecText.text = this.msDiff
 
-    this._string = `${TimeIndicator.zeroPadding(mDiff, 2)}:${TimeIndicator.zeroPadding(sDiff, 2)}.${TimeIndicator.zeroPadding(msDiff, 2)}`
+    this._string = `${TimeIndicator.zeroPadding(this.mDiff, 2)}:${TimeIndicator.zeroPadding(this.sDiff, 2)}.${TimeIndicator.zeroPadding(this.msDiff, 2)}`
 
   }
 

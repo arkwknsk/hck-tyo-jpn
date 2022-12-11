@@ -11,6 +11,7 @@ import { MathUtil } from './MathUtil'
 import { MapPanel } from './MapPanel'
 import { Title } from './Title'
 import { TimeIndicator } from './TimeIndicator'
+import seedrandom from 'seedrandom'
 
 import './main.css';
 import './reset.css';
@@ -26,6 +27,7 @@ export class AppManager {
   private static titleText: Title | undefined
   private static mapPanels: MapPanel[] | undefined
   private static timeIndicator: TimeIndicator
+  private static mapMasks: HTMLDivElement[] | undefined
 
   private static stats: Stats;
 
@@ -48,7 +50,7 @@ export class AppManager {
 
   private constructor() {
     AppManager.stats = Stats()
-    AppManager.startTime = new Date();
+    AppManager.startTime = new Date(); //Begin
     AppManager.timeIndicator = new TimeIndicator(AppManager.startTime)
   }
 
@@ -57,6 +59,18 @@ export class AppManager {
     new AppManager()
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(AppManager.stats.dom);
+
+    //ISO 2022-12-11T03:20:02.885Z
+    const exp = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z/
+    const iso: string = `${AppManager.startTime.toISOString()}`
+    const result = iso.match(exp)
+    if (result) {
+      const seed = result.slice(1, result.length).join('')
+      console.log(`[Main]: seed:${seed}`)
+      const generator = seedrandom(seed);
+      const randomNumber = generator();
+      console.log(`[Main]: randomNumber:${randomNumber}`)
+    }
 
     /*
     const style = {
@@ -121,11 +135,33 @@ export class AppManager {
       step: 1.0
     });
     */
+    this.initMaskMap()
     await this.initPIXI()
-    await this.initCacheCanvas()
+    // await this.initCacheCanvas()
+
+    if (AppManager.titleText) {
+      AppManager.titleText.visible = true
+      AppManager.titleText.Start()
+    }
+
     await this.createLargeMap()
     await this.initTimeline()
     // this.mapPanels = this.addMapPanel()
+
+  }
+
+
+  static initMaskMap() {
+    this.mapMasks = []
+    for (let i = 0; i < 2; i++) {
+      var maskElement = document.createElement('div')
+      document.body.appendChild(maskElement);
+      this.mapMasks.push(maskElement)
+
+      maskElement.setAttribute("id", `mapMask${i}`)
+      if (i === 0) maskElement.setAttribute("style", `opacity:1.0;z-index:100;background-color:#000000;position:absolute;top:0;left:${ScreenHelper.LEFT_SCREEN_LEFT}px;width:${ScreenHelper.SIDE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
+      if (i === 1) maskElement.setAttribute("style", `opacity:1.0;z-index:100;background-color:#000000;position:absolute;top:0;left:${ScreenHelper.RIGHT_SCREEN_LEFT}px;width:${ScreenHelper.SIDE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
+    }
 
   }
 
@@ -171,6 +207,7 @@ export class AppManager {
       AppManager.gridGraphics.addChild(layoutGrid)
     }
 
+    this.timeIndicator.x = ScreenHelper.FRONT_SCREEN_LEFT
     AppManager.gridGraphics.addChild(this.timeIndicator)
 
     AppManager.app.ticker.add(() => {
@@ -223,6 +260,8 @@ export class AppManager {
   }
 
   static async createLargeMap(): Promise<void> {
+    console.log(`[Main]: createLargeMap`)
+
     return new Promise<void>((resolve, reject) => {
       var mapElement = document.createElement('div')
       document.body.appendChild(mapElement);
@@ -405,10 +444,6 @@ export class AppManager {
     })
       .call(() => {
         // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
-        if (AppManager.titleText) {
-          AppManager.titleText.visible = true
-          AppManager.titleText.Start()
-        }
         AppManager.createCacheMaps()
         AppManager.zoomLargeMap(13.9)
       }, []
@@ -419,17 +454,39 @@ export class AppManager {
       //   , "+=3"
       // )
       .call(() => {
+        if (AppManager.titleText) AppManager.titleText.toFix()
+      }, []
+        , `+=${3.0 - AppManager.timeIndicator.sDiff}`
+      )
+      .call(() => {
+        if (AppManager.mapMasks) {
+          for (let i = 0; i < AppManager.mapMasks.length; i++) {
+            const mask = AppManager.mapMasks[i]
+            mask.setAttribute("style", `display:none`);
+          }
+        }
+
+        if (AppManager.titleText) AppManager.titleText.toFix()
         AppManager.largeMap?.jumpTo({ zoom: 14.0 })
         AppManager.zoomLargeMap(14.9)
       }, []
-        , "+=5"
+        , "+=1.5"
       )
       .call(() => {
-        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
+        // if (AppManager.largeMap) AppManager.largeMap.remove()
+        AppManager.largeMap?.getContainer().setAttribute("style", `display:none`);
+        console.log(`[TL] CALL ${this.timeIndicator.toString()}`)
+
         console.log(`[TL] addMapPanel ${this.timeIndicator.toString()}`)
         AppManager.mapPanels = AppManager.addMapPanel()
+        AppManager.showMapPanel()
+
       }, []
-        , "+=3"
+        , "+=5")
+      .call(() => {
+        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
+      }, []
+        , "+=5"
       )
       .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
         , "+=5")
@@ -476,7 +533,7 @@ export class AppManager {
       }
 
       mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
-      // console.log(`[Main:addMapPanel]: ${indexX} ${ScreenHelper.BACK_SCREEN_LEFT_MARGIN}`)
+      // console.log(`[Main: addMapPanel]: ${ indexX } ${ ScreenHelper.BACK_SCREEN_LEFT_MARGIN }`)
 
       AppManager.mapGraphics.addChild(mapPanel)
       mapPanels.push(mapPanel)
@@ -488,6 +545,7 @@ export class AppManager {
   }
 
   static async showMapPanel() {
+    if (!AppManager) return
     if (!AppManager.mapPanels) return
     let playlist: number[] = []
     for (let i = 0; i < AppManager.mapPanels.length; i++) {
@@ -514,7 +572,7 @@ export class AppManager {
       console.log('next maps')
     })
 
-    for (let i = 0; i < this.mapPanels.length; i++) {
+    for (let i = 0; i < AppManager.length; i++) {
       playlist.push(i)
     }
     playlist = this.shuffle(playlist)
