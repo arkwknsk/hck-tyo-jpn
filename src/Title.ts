@@ -32,7 +32,7 @@ export class Title extends Graphics {
           fill: 0xffffff,
           fontSize: 120,
           letterSpacing: -0.25
-          , align: 'left',
+          , align: 'center',
         }
       );
       text.x = i * 120
@@ -44,15 +44,19 @@ export class Title extends Graphics {
 
   public Start(): void {
     // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
-    gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
-      .call(() => {
-        this._status = 'toFix'
-      }, [], "+=3.0")
+    // gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
+    //   .call(() => {
+    //     this._status = 'toFix'
+    //   }, [], "+=3.0")
     if (AppManager) {
       if (AppManager.app) {
         AppManager.app.ticker.add(this.update);
       }
     }
+  }
+
+  public toFix(): void {
+    this._status = 'toFix'
   }
 
   private update = (): void => {
@@ -69,8 +73,6 @@ export class Title extends Graphics {
       if (AppManager.app) {
         if (this.dispCursor <= this.TITLE_STRING.length) {
           this.dispCursor += this.dispCursorStep;
-          console.log(this.dispCursor)
-
         } else {
           AppManager.app.ticker.remove(this.update);
         }
