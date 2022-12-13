@@ -188,6 +188,7 @@ export class AppManager {
 
     await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
     await Assets.load("Inter-Regular.ttf").catch((error) => { console.log(error.message); });;
+    await Assets.load("Lekton-Regular.ttf").catch((error) => { console.log(error.message); });;
     console.log("[Main]: Loaded fonts")
 
 
@@ -202,10 +203,10 @@ export class AppManager {
 
     const grids = ScreenHelper.GetGrids()
     const layoutGrid = ScreenHelper.GetLayoutGrid()
-    if (AppManager.gridGraphics) {
-      AppManager.gridGraphics.addChild(grids)
-      AppManager.gridGraphics.addChild(layoutGrid)
-    }
+    // if (AppManager.gridGraphics) {
+    //   AppManager.gridGraphics.addChild(grids)
+    //   AppManager.gridGraphics.addChild(layoutGrid)
+    // }
 
     this.timeIndicator.x = ScreenHelper.FRONT_SCREEN_LEFT
     AppManager.gridGraphics.addChild(this.timeIndicator)

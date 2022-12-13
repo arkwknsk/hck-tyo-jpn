@@ -11,6 +11,8 @@ export class MapPanel extends Graphics {
   private _mapArea: Graphics | undefined
   private mapSprite: Sprite | undefined
   private _status: string = 'random'
+  private _frameGraphics: Graphics | undefined
+  private _corner: Graphics[] | undefined
 
 
   private latValue = new Text()
@@ -33,9 +35,14 @@ export class MapPanel extends Graphics {
 
   public init() {
     // console.log(`[MapPanel]: init id:${this._rasterMap.id} this._rasterMap.lat:${this._rasterMap.lat}`)
-    this.dispLatCursorStep = this._rasterMap.lat.toString().length / (1.0 * 30)
-    this.dispLngCursorStep = this._rasterMap.lng.toString().length / (1.0 * 30)
+    if (!this._rasterMap) return
+    try {
+      this.dispLatCursorStep = this._rasterMap.lat.toString().length / (1.0 * 30)
+      this.dispLngCursorStep = this._rasterMap.lng.toString().length / (1.0 * 30)
 
+    } catch (error) {
+      return;
+    }
     this._mapArea = new Graphics()
     this._mapArea.beginFill(0xcccccc)
     this._mapArea.drawRect(0, ScreenHelper.UNIT * 2, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6)
@@ -44,36 +51,23 @@ export class MapPanel extends Graphics {
 
 
     const style: TextStyle = new TextStyle({
-      fontFamily: "Inter Medium",
-      fontWeight: '500',
+      fontFamily: "Lekton Regular",
+      fontWeight: '400',
       fill: 0xffffff,
       fontSize: 12,
       letterSpacing: 0
       , align: 'left',
     })
 
-    // const latLabel = new Text(
-    //   `Lat:`, style
-    // );
-    // latLabel.x = 0
-    // this.addChild(latLabel);
-
     this.latValue = new Text('', style);
     this.latValue.x = 0
-    this.latValue.y = ScreenHelper.UNIT / 2
+    this.latValue.y = ScreenHelper.UNIT / 2 + ScreenHelper.UNIT / 2
     this.latValue.text = this._rasterMap.lat.toString()
     this.addChild(this.latValue);
 
-    // const lngLabel = new Text(
-    //   `Lng:`, style
-    // );
-    // lngLabel.x = 0
-    // lngLabel.y = 24
-    // this.addChild(lngLabel);
-
     this.lngValue = new Text('', style);
     this.lngValue.x = 0
-    this.lngValue.y = ScreenHelper.UNIT / 2 + 18
+    this.lngValue.y = ScreenHelper.UNIT / 2 + ScreenHelper.UNIT / 2 + 18
     this.lngValue.text = this._rasterMap.lng.toString()
     this.addChild(this.lngValue);
 
@@ -87,10 +81,40 @@ export class MapPanel extends Graphics {
     this.mapSprite = mapSprite
 
     this.addChild(mapSprite)
+
+    const g = new Graphics()
+    g.lineStyle(1, 0xFFFFFF, 0.5)
+      .drawRect(0, ScreenHelper.UNIT * 2, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6)
+    this.addChild(g)
+
+    const c = new Graphics()
+    c.lineStyle(1, 0xFFFFFF, 0.8)
+      .moveTo(0, 0).lineTo(0, 10)
+      .moveTo(0, 0).lineTo(10, 0)
+
+
+    this._corner = []
+    for (let i = 0; i < 4; i++) {
+      const target = c.clone()
+      target.angle = i * 90
+      if (i < 2) {
+        target.x = (i % 2) * ScreenHelper.UNIT * 6
+      } else if (i == 2) {
+        target.x = ScreenHelper.UNIT * 6
+      } else {
+        target.x = 0
+      }
+      target.y = Math.floor(i / 2) * ScreenHelper.UNIT * 6 + ScreenHelper.UNIT * 2
+
+      this._corner.push(target)
+
+      this.addChild(target)
+    }
   }
 
 
   public Start(): void {
+    if (!this._rasterMap) return
     if (this.mapSprite) {
       // this.counter = 0
       // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
