@@ -11,9 +11,12 @@
       "type": "vector",
       "tiles": ["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"],
       "minzoom": 4,
-      "maxzoom": 16
+      "maxzoom": 16,
+      "attribution": "<a href=\"https://maps.gsi.go.jp/vector/\" target=\"_blank\">地理院地図Vector（仮称）</a>"
     }
   },
+  "sprite": "https://gsi-cyberjapan.github.io/gsivectortile-mapbox-gl-js/sprite/std",
+  "glyphs": "https://maps.gsi.go.jp/xyz/noto-jp/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
@@ -1560,7 +1563,7 @@
       "maxzoom": 14,
       "filter": ["all", ["in", "ftCode", 3102], ["==", "$type", "Polygon"]],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-color": "rgba(255,255,255,0)" }
+      "paint": { "fill-color": "rgba(250,250,250,0)" }
     },
     {
       "id": "gsibv-vectortile-layer-2449",
@@ -1611,7 +1614,7 @@
       "maxzoom": 14,
       "filter": ["all", ["in", "ftCode", 3103], ["==", "$type", "Polygon"]],
       "layout": { "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 1 }
+      "paint": { "line-color": "rgba(250,0,0,1)", "line-width": 1 }
     },
     {
       "id": "gsibv-vectortile-layer-2452",
@@ -1628,7 +1631,7 @@
       "maxzoom": 14,
       "filter": ["all", ["in", "ftCode", 3103], ["==", "$type", "Polygon"]],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-color": "rgba(255,255,255,0)" }
+      "paint": { "fill-color": "rgba(250,0,0,0)" }
     },
     {
       "id": "gsibv-vectortile-layer-2453",
@@ -1645,7 +1648,7 @@
       "maxzoom": 18,
       "filter": ["all", ["in", "ftCode", 3103], ["==", "$type", "Polygon"]],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-color": "rgba(250,250,250,1)" }
+      "paint": { "fill-color": "rgba(250,0,0,1)" }
     },
     {
       "id": "gsibv-vectortile-layer-2454",
@@ -1662,7 +1665,7 @@
       "maxzoom": 18,
       "filter": ["all", ["in", "ftCode", 3103], ["==", "$type", "LineString"]],
       "layout": { "line-cap": "butt", "visibility": "visible" },
-      "paint": { "line-color": "rgba(200,200,200,1)", "line-width": 2.5 }
+      "paint": { "line-color": "rgba(200,200,200,0)", "line-width": 2.5 }
     },
     {
       "id": "gsibv-vectortile-layer-2455",
@@ -1834,7 +1837,7 @@
         ["all", ["in", "ftCode", 3103], ["==", "$type", "Polygon"]]
       ],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-color": "rgba(250,250,250,1)" }
+      "paint": { "fill-color": "rgba(250,0,0,1)" }
     },
     {
       "id": "gsibv-vectortile-layer-2464",
@@ -1855,7 +1858,7 @@
         ["all", ["in", "ftCode", 3103], ["==", "$type", "LineString"]]
       ],
       "layout": { "line-cap": "butt", "visibility": "visible" },
-      "paint": { "line-color": "rgba(200,200,200,1)", "line-width": 1.5 }
+      "paint": { "line-color": "rgba(20,20,20,0)", "line-width": 1.5 }
     },
     {
       "id": "gsibv-vectortile-layer-2465",
@@ -2150,7 +2153,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2478",
@@ -2172,7 +2175,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2479",
@@ -2194,7 +2197,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2480",
@@ -2260,7 +2263,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2483",
@@ -2282,7 +2285,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2484",
@@ -2304,7 +2307,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2485",
@@ -2348,7 +2351,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2487",
@@ -2393,7 +2396,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2489",
@@ -2438,7 +2441,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2491",
@@ -2460,7 +2463,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2492",
@@ -2741,8 +2744,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 4],
-            [17, 13]
+            [15, 3],
+            [17, 3]
           ]
         },
         "line-dasharray": [1.5, 0.3]
@@ -2894,8 +2897,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 5],
-            [17, 25]
+            [15, 3],
+            [17, 3]
           ]
         }
       }
@@ -3104,8 +3107,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 4],
-            [17, 22]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -3451,7 +3454,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2523",
@@ -3474,7 +3477,7 @@
       },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 5,
+        "line-width": 3,
         "line-dasharray": [1, 0.1]
       }
     },
@@ -3497,7 +3500,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2525",
@@ -3520,7 +3523,7 @@
       },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 5,
+        "line-width": 3,
         "line-dasharray": [1, 0.1]
       }
     },
@@ -3543,7 +3546,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2527",
@@ -3566,7 +3569,7 @@
       },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 5,
+        "line-width": 3,
         "line-dasharray": [1, 0.1]
       }
     },
@@ -3652,7 +3655,7 @@
         "line-width": {
           "stops": [
             [15, 3],
-            [17, 12]
+            [17, 3]
           ]
         }
       }
@@ -4141,8 +4144,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 4],
-            [17, 24]
+            [15, 3],
+            [17, 3]
           ]
         }
       }
@@ -4355,7 +4358,7 @@
       "paint": {
         "line-color": "rgba(250,250,250,1)",
         "line-width": 3,
-        "line-dasharray": [3, 2]
+        "line-dasharray": [2]
       }
     },
     {
@@ -4397,7 +4400,7 @@
       "layout": { "line-cap": "butt", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 6,
+        "line-width": 3,
         "line-dasharray": [0.2, 3]
       }
     },
@@ -4539,7 +4542,7 @@
       "layout": { "line-cap": "butt", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 8,
+        "line-width": 3,
         "line-dasharray": [0.1, 5]
       }
     },
@@ -4601,7 +4604,7 @@
       "layout": { "line-cap": "butt", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 8,
+        "line-width": 3,
         "line-dasharray": [0.1, 4]
       }
     },
@@ -4661,7 +4664,7 @@
       "layout": { "line-cap": "butt", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 8,
+        "line-width": 3,
         "line-dasharray": [0.1, 5]
       }
     },
@@ -4721,7 +4724,7 @@
       "layout": { "line-cap": "butt", "visibility": "none" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 8,
+        "line-width": 3,
         "line-dasharray": [0.1, 0.2, 0.1, 5]
       }
     },
@@ -4781,7 +4784,7 @@
       "layout": { "line-cap": "butt", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 8,
+        "line-width": 3,
         "line-dasharray": [0.1, 0.2, 0.1, 5]
       }
     },
@@ -4813,7 +4816,7 @@
       "paint": {
         "line-color": "rgba(250,250,250,1)",
         "line-width": 3,
-        "line-dasharray": [3, 2]
+        "line-dasharray": []
       }
     },
     {
@@ -4841,7 +4844,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2572",
@@ -4868,7 +4871,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2573",
@@ -4897,7 +4900,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -4926,7 +4929,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2575",
@@ -4979,7 +4982,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(200,200,200,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(200,200,200,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2577",
@@ -5007,7 +5010,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "none" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2578",
@@ -5035,7 +5038,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "none" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2579",
@@ -5065,7 +5068,7 @@
       "layout": { "line-cap": "square", "visibility": "none" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [4, 2, 0.1, 2]
       }
     },
@@ -5278,7 +5281,7 @@
         "line-width": {
           "stops": [
             [15, 3],
-            [17, 20]
+            [17, 3]
           ]
         }
       }
@@ -5525,8 +5528,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 12],
-            [17, 37]
+            [2, 2],
+            [2, 2]
           ]
         }
       }
@@ -5585,8 +5588,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 6],
-            [17, 24]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -5645,8 +5648,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 12],
-            [17, 37]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -5705,8 +5708,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 6],
-            [17, 24]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -5795,8 +5798,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 5],
-            [17, 16]
+            [15, 2],
+            [17, 3]
           ]
         }
       }
@@ -5825,8 +5828,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 6],
-            [17, 24]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -5855,8 +5858,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 7],
-            [17, 26]
+            [2, 2],
+            [2, 2]
           ]
         }
       }
@@ -5885,8 +5888,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 12],
-            [17, 37]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -6033,8 +6036,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 9],
-            [17, 34]
+            [2, 2],
+            [2, 2]
           ]
         }
       }
@@ -6184,8 +6187,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 9],
-            [17, 34]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -6459,7 +6462,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2624",
@@ -6487,7 +6490,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2625",
@@ -6517,7 +6520,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -6639,7 +6642,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "none" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2630",
@@ -6667,7 +6670,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "none" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2631",
@@ -6697,7 +6700,7 @@
       "layout": { "line-cap": "square", "visibility": "none" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [4, 2, 0.1, 2]
       }
     },
@@ -6730,8 +6733,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [14, 14],
-            [16, 18]
+            [2, 2],
+            [2, 2]
           ]
         }
       }
@@ -6802,8 +6805,8 @@
         "line-width": 1,
         "line-offset": {
           "stops": [
-            [14, 4],
-            [16, 6]
+            [2, 2],
+            [2, 2]
           ]
         }
       }
@@ -7011,7 +7014,7 @@
         "line-width": {
           "stops": [
             [15, 2],
-            [17, 12]
+            [17, 3]
           ]
         }
       }
@@ -7039,8 +7042,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 3],
-            [17, 20]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -7068,8 +7071,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 4],
-            [17, 24]
+            [15, 2],
+            [17, 2]
           ]
         }
       }
@@ -7097,8 +7100,8 @@
         "line-color": "rgba(250,250,250,1)",
         "line-width": {
           "stops": [
-            [15, 9],
-            [17, 34]
+            [15, 4],
+            [17, 4]
           ]
         }
       }
@@ -7217,10 +7220,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": {
-        "line-color": "rgba(173,173,173,0.75)",
-        "line-width": 1.5
-      }
+      "paint": { "line-color": "rgba(173,173,173,0.75)", "line-width": 1.5 }
     },
     {
       "id": "gsibv-vectortile-layer-2649",
@@ -7249,7 +7249,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(173,173,173,1)", "line-width": 1.5 }
+      "paint": { "line-color": "rgba(173,173,173,1)", "line-width": 1 }
     },
     {
       "id": "gsibv-vectortile-layer-2650",
@@ -7336,7 +7336,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(173,173,173,1)", "line-width": 2 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2653",
@@ -7394,10 +7394,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": {
-        "line-color": "rgba(173,173,173,0.75)",
-        "line-width": 2.5
-      }
+      "paint": { "line-color": "rgba(173,173,173,0.75)", "line-width": 2.5 }
     },
     {
       "id": "gsibv-vectortile-layer-2655",
@@ -7513,7 +7510,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(173,173,173,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2659",
@@ -7790,7 +7787,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2670",
@@ -7832,7 +7829,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2672",
@@ -7923,7 +7920,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2676",
@@ -7965,7 +7962,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2678",
@@ -8056,7 +8053,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2682",
@@ -8077,7 +8074,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2683",
@@ -8098,7 +8095,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2684",
@@ -8119,7 +8116,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2685",
@@ -8189,7 +8186,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2688",
@@ -8210,7 +8207,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2689",
@@ -8231,7 +8228,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 7 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2690",
@@ -8252,7 +8249,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2691",
@@ -8757,7 +8754,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2711",
@@ -8848,7 +8845,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2715",
@@ -8869,7 +8866,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2716",
@@ -8890,7 +8887,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2717",
@@ -8911,7 +8908,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2718",
@@ -8981,7 +8978,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2721",
@@ -9002,7 +8999,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2722",
@@ -9023,7 +9020,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2723",
@@ -9044,7 +9041,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2724",
@@ -9114,7 +9111,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2727",
@@ -9135,7 +9132,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2728",
@@ -9156,7 +9153,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 7 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2729",
@@ -9177,7 +9174,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2730",
@@ -9699,7 +9696,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2748",
@@ -9729,7 +9726,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2749",
@@ -9761,7 +9758,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -9794,7 +9791,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2751",
@@ -9825,7 +9822,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2752",
@@ -9858,7 +9855,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -9889,7 +9886,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2754",
@@ -9918,7 +9915,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2755",
@@ -9949,7 +9946,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -9981,7 +9978,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2757",
@@ -10011,7 +10008,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2758",
@@ -10043,7 +10040,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2]
       }
     },
@@ -10073,7 +10070,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2760",
@@ -10103,7 +10100,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 0.1]
       }
     },
@@ -10133,7 +10130,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2762",
@@ -10163,7 +10160,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 0.1]
       }
     },
@@ -10195,7 +10192,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2764",
@@ -10225,7 +10222,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2765",
@@ -10257,7 +10254,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2, 0.1, 2]
       }
     },
@@ -10290,7 +10287,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2767",
@@ -10321,7 +10318,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2768",
@@ -10354,7 +10351,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2, 0.1, 2]
       }
     },
@@ -10385,7 +10382,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2770",
@@ -10414,7 +10411,7 @@
         ]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2771",
@@ -10445,7 +10442,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2, 0.1, 2]
       }
     },
@@ -10477,7 +10474,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2773",
@@ -10507,7 +10504,7 @@
         ["any", ["==", "staCode", "0"], ["!has", "staCode"]]
       ],
       "layout": { "line-cap": "square", "visibility": "visible" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2774",
@@ -10539,7 +10536,7 @@
       "layout": { "line-cap": "square", "visibility": "visible" },
       "paint": {
         "line-color": "rgba(250,250,250,1)",
-        "line-width": 4,
+        "line-width": 3,
         "line-dasharray": [2, 2, 0.1, 2]
       }
     },
@@ -10564,7 +10561,7 @@
         ["in", "railState", 100, 300, 500, 2, 3]
       ],
       "layout": { "line-cap": "square", "visibility": "none" },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2776",
@@ -10581,7 +10578,7 @@
       "maxzoom": 14,
       "filter": ["all", ["in", "ftCode", 8201], ["==", "railState", 0], ["has", "staCode"], ["!=", "staCode", "0"]],
       "layout": { "line-cap": "butt", "visibility": "visible" },
-      "paint": { "line-color": "rgba(50,50,50,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(50,50,50,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2777",
@@ -10825,7 +10822,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2787",
@@ -10867,7 +10864,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2789",
@@ -10959,7 +10956,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2793",
@@ -11001,7 +10998,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2795",
@@ -11022,7 +11019,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2796",
@@ -11093,7 +11090,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2799",
@@ -11114,7 +11111,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2800",
@@ -11135,7 +11132,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2801",
@@ -11156,7 +11153,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2802",
@@ -11226,7 +11223,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 6 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2805",
@@ -11247,7 +11244,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 4 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 3 }
     },
     {
       "id": "gsibv-vectortile-layer-2806",
@@ -11268,7 +11265,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 7 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2807",
@@ -11289,7 +11286,7 @@
         "line-join": "round",
         "visibility": "visible"
       },
-      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 5 }
+      "paint": { "line-color": "rgba(250,250,250,1)", "line-width": 2 }
     },
     {
       "id": "gsibv-vectortile-layer-2808",
@@ -11988,7 +11985,7 @@
       "maxzoom": 17,
       "filter": ["all", ["==", "lvOrder", 4], ["all", ["in", "ftCode", 3103], ["==", "$type", "Polygon"]]],
       "layout": { "visibility": "visible" },
-      "paint": { "fill-color": "rgba(250,250,250,1)" }
+      "paint": { "fill-color": "rgba(250,0,0,1)" }
     },
     {
       "id": "gsibv-vectortile-layer-2843",
@@ -12005,7 +12002,7 @@
       "maxzoom": 17,
       "filter": ["all", ["==", "lvOrder", 4], ["all", ["in", "ftCode", 3103], ["==", "$type", "LineString"]]],
       "layout": { "line-cap": "butt", "visibility": "visible" },
-      "paint": { "line-color": "rgba(200,200,200,1)", "line-width": 1.5 }
+      "paint": { "line-color": "rgba(200,200,200,0)", "line-width": 1.5 }
     },
     {
       "id": "gsibv-vectortile-layer-2844",
