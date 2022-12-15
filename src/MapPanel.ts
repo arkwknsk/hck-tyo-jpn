@@ -8,6 +8,9 @@ import { ScreenHelper } from './ScreenHelper';
 
 export class MapPanel extends Graphics {
   private _rasterMap: RasterMap
+  public get rasterMap(): RasterMap {
+    return this._rasterMap
+  }
   private _mapArea: Graphics | undefined
   private mapSprite: Sprite | undefined
   private _status: string = 'random'
@@ -162,6 +165,8 @@ export class MapPanel extends Graphics {
       }
 
     }
+    // this.x += 0.25;
+    this.x += 1;
     // console.log(this)
   }
 

@@ -11,10 +11,21 @@ import { MathUtil } from './MathUtil'
 import { MapPanel } from './MapPanel'
 import { Title } from './Title'
 import { TimeIndicator } from './TimeIndicator'
+import { Clock } from './Clock'
 import seedrandom from 'seedrandom'
 
 import './main.css';
 import './reset.css';
+
+const StatusType = {
+  OP: "op",
+  HORIZONTAL: "Horizontal",
+  Hearts: "hearts",
+  Spades: "spades",
+} as const;
+
+type StatusType = typeof StatusType[keyof typeof StatusType];
+
 
 /**
  * Main Class
@@ -38,7 +49,19 @@ export class AppManager {
 
   private static withoutRoadStyle: StyleSpecification | undefined
 
-  private static startTime: Date;
+  private static startTime: Date
+
+
+
+  /**
+   * Direction Status 演出ステータス
+   *
+   * @private
+   * @static
+   * @type {string}
+   * @memberof AppManager
+   */
+  private static status: StatusType
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -60,17 +83,13 @@ export class AppManager {
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild(AppManager.stats.dom);
 
-    //ISO 2022-12-11T03:20:02.885Z
-    const exp = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z/
-    const iso: string = `${AppManager.startTime.toISOString()}`
-    const result = iso.match(exp)
-    if (result) {
-      const seed = result.slice(1, result.length).join('')
-      console.log(`[Main]: seed:${seed}`)
-      const generator = seedrandom(seed);
-      const randomNumber = generator();
-      console.log(`[Main]: randomNumber:${randomNumber}`)
-    }
+    AppManager.status = StatusType.OP
+
+    const seed = MathUtil.getSeed()
+    console.log(`[Main]: seed:${seed}`)
+    const generator = seedrandom(seed);
+    const randomNumber = generator();
+    console.log(`[Main]: randomNumber:${randomNumber}`)
 
     /*
     const style = {
@@ -136,8 +155,15 @@ export class AppManager {
     });
     */
     this.initMaskMap()
+
+    const layers = AppManager.filterLayer()
+    // console.debug(layers);
+    // Blank.layers = layers
+    AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
+    AppManager.withoutRoadStyle.layers = layers
+
     await this.initPIXI()
-    // await this.initCacheCanvas()
+    await this.initCacheCanvas()
 
     if (AppManager.titleText) {
       AppManager.titleText.visible = true
@@ -236,28 +262,35 @@ export class AppManager {
 
   }
 
-  static async createCacheMaps(): Promise<void> {
-    const layers = AppManager.filterLayer()
-    // console.debug(layers);
-    // Blank.layers = layers
-    AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
-    AppManager.withoutRoadStyle.layers = layers
-
-
-    console.log("[Main]: Before createMapCopyCanvas")
-    // await this.initMap()
+  /**
+   * preload 
+   * 
+   */
+  static async preloadRasterMaps(): Promise<void> {
+    console.log("[Main]: Before preloadRasterMaps")
     AppManager.rasterMaps = []
-    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
-      var rasterMap: RasterMap = {
-        id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
-
-      }
-      rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+    for (let i = 0; i < Context.PRELOAD_MAPS; i++) {
+      var rasterMap = await AppManager.createRasterMap(i)
       AppManager.rasterMaps.push(rasterMap)
-      // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
     }
-    console.log(`[Main]: After createMapCopyCanvas  ${AppManager.timeIndicator.toString()}`)
+    console.log(`[Main]: After preloadRasterMaps  ${AppManager.timeIndicator.toString()}`)
+  }
 
+  /**
+   * 地図のラスター形式のキャッシュを生成
+   *
+   * @param name - description
+  */
+  static async createRasterMap(index: number): Promise<RasterMap> {
+    const seed = `MathUtil.getSeed()${index}`
+    var rasterMap: RasterMap = {
+      id: index, lat: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LNG, Context.MAX_LNG),
+    }
+    rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+    // AppManager.rasterMaps.push(rasterMap)
+    // console.log(`[Main]: After createMapCopyCanvas ${rasterMap.lat},${rasterMap.lng} ${AppManager.timeIndicator.toString()}`)
+
+    return rasterMap
   }
 
   static async createLargeMap(): Promise<void> {
@@ -322,7 +355,8 @@ export class AppManager {
    * @returns フィルタリング後のレイヤー
    */
   static filterLayer(): any {
-    const wantLayer = ['building', 'structurea', 'structurel', 'wstructurea']
+    const wantLayer = ['building', 'structurea', 'structurel']
+    // const wantLayer = ['road']
     const evenValues = Blank.layers.filter((value) => {
       if (value["source-layer"] !== undefined) {
         if (wantLayer.includes(value["source-layer"])) {
@@ -343,23 +377,26 @@ export class AppManager {
   static initCacheCanvas(): Promise<void> {
     return new Promise<void>((resolve) => {
       const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
-      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
-      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
+      const w = (Context.MAP_WIDTH * 2 * 10).toString()
+      const h = (Context.MAP_HEIGHT * 2).toString()
+      cacheCanvasElement.setAttribute('width', w)
+      cacheCanvasElement.setAttribute('height', h);
+      cacheCanvasElement.setAttribute("style", `position: absolute; top: 1080px;left: 0px;`);
 
       resolve()
     })
   }
 
   static createMapCopyCanvas(index: number, lat: number, lng: number): Promise<HTMLImageElement> {
+    // console.log(`[Main] createMapCopyCanvas ${lat},${lng}`)
     return new Promise<HTMLImageElement>((resolve, reject) => {
       var mapElement = document.createElement('div')
       document.body.appendChild(mapElement);
-      // const mapID = `map${index}`
-      const mapID = `map-small`
+      // const mapID = `map${ index } `
+      const mapID = `map-small-${index}`
       mapElement.setAttribute("id", mapID)
       const left = 0
-      mapElement.setAttribute("style", `z-index:-1000;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
+      mapElement.setAttribute("style", `z - index: -1000; position: absolute; top: 0; left:${left} px; width:${Context.MAP_WIDTH * 2} px; height:${Context.MAP_HEIGHT * 2} px; `);
 
       const map = new Map({
         "container": mapID,
@@ -376,6 +413,7 @@ export class AppManager {
       });
 
       map.once('load', () => {
+        // console.log(`index:${index} ${mapID}`)
         let data: string;
         var mapElement = document.getElementById(mapID)
         if (mapElement) {
@@ -390,6 +428,7 @@ export class AppManager {
               img.src = data
 
               cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+              // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT)
               document.body.removeChild(mapElement)
               map.remove()
               resolve(img)
@@ -406,34 +445,6 @@ export class AppManager {
     });
   }
 
-  static addRasterMap() {
-    let i = 0
-    const cols = Context.MAPS_COLS
-    const rows = Context.MAPS_ROWS
-    const scale = 0.5
-    const marginY = (Context.STAGE_HEIGHT - Context.MAP_HEIGHT * scale * rows) / (rows + 1)
-    const marginX = (Context.STAGE_WIDTH - Context.MAP_WIDTH * scale * cols) / (cols + 1)
-    AppManager.rasterMaps.forEach(item => {
-      console.log("[Main] addRasterMap")
-      if (AppManager.mapGraphics) {
-        const loadTexture = new Texture(new BaseTexture(item.image))
-        const loadSprite = new Sprite(loadTexture)
-        // loadSprite.anchor.set(0.5)
-        loadSprite.x = marginX + (i % cols) * Context.MAP_WIDTH * scale + marginX * (i % cols)
-
-        loadSprite.y = marginY + Math.floor(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.floor(i / cols)
-        // loadSprite.y = 100
-        // console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
-
-        loadSprite.width = Context.MAP_WIDTH * 0.75
-        loadSprite.height = Context.MAP_HEIGHT * 0.75
-        AppManager.mapGraphics.addChild(loadSprite)
-      }
-
-      i++
-    });
-  }
-
   static async initTimeline(): Promise<void> {
     console.log("[Main] initTimeline")
 
@@ -441,11 +452,11 @@ export class AppManager {
 
     if (!AppManager.largeMap) return
     const tl = gsap.timeline({}).call(() => {
-      console.log(`[TL] START ${this.timeIndicator.toString()}`)
+      console.log(`[TL] START ${this.timeIndicator.toString()} `)
     })
       .call(() => {
         // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
-        AppManager.createCacheMaps()
+        AppManager.preloadRasterMaps()
         AppManager.zoomLargeMap(13.9)
       }, []
         , "0")
@@ -457,13 +468,13 @@ export class AppManager {
       .call(() => {
         if (AppManager.titleText) AppManager.titleText.toFix()
       }, []
-        , `+=${3.0 - AppManager.timeIndicator.sDiff}`
+        , `+= ${3.0 - AppManager.timeIndicator.sDiff} ` //Fixed discrepancy between app start time and timeline start time. アプリ起動時刻とtimelineがスタートした時刻のズレを補正
       )
       .call(() => {
         if (AppManager.mapMasks) {
           for (let i = 0; i < AppManager.mapMasks.length; i++) {
             const mask = AppManager.mapMasks[i]
-            mask.setAttribute("style", `display:none`);
+            mask.setAttribute("style", `display: none`);
           }
         }
 
@@ -475,11 +486,12 @@ export class AppManager {
       )
       .call(() => {
         // if (AppManager.largeMap) AppManager.largeMap.remove()
-        AppManager.largeMap?.getContainer().setAttribute("style", `display:none`);
-        console.log(`[TL] CALL ${this.timeIndicator.toString()}`)
+        AppManager.largeMap?.getContainer().setAttribute("style", `display: none`);
+        console.log(`[TL] CALL ${this.timeIndicator.toString()} `)
 
-        console.log(`[TL] addMapPanel ${this.timeIndicator.toString()}`)
-        AppManager.mapPanels = AppManager.addMapPanel()
+        console.log(`[TL] addMapPanel ${this.timeIndicator.toString()} `)
+        AppManager.status = StatusType.HORIZONTAL
+        AppManager.mapPanels = AppManager.addPreloadMapPanel()
         AppManager.showMapPanel()
 
       }, []
@@ -489,56 +501,39 @@ export class AppManager {
       }, []
         , "+=5"
       )
-      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
-        , "+=5")
-      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
-        , "+=5")
-
-
-
   }
 
-  static addMapPanel(): MapPanel[] {
+  static addPreloadMapPanel(): MapPanel[] {
+    // console.log(`[Main] addPreloadMapPanel:`)
+
     if (!AppManager.mapGraphics) return []
     if (!AppManager.rasterMaps) return []
 
     let mapPanels: MapPanel[] = []
 
-    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+    for (let i = 0; i < AppManager.rasterMaps.length; i++) {
       const mapPanel = new MapPanel(AppManager.rasterMaps[i])
       mapPanel.alpha = 0
 
       const indexX = (i % Context.MAPS_COLS)
-      const indexY = Math.floor(i / Context.MAPS_COLS)
+      const generator = seedrandom(MathUtil.getSeed());
+      const randomNumber = generator();
 
-      const cols = [4, 6, 8, 6, 4]
+      const indexY = Math.floor((randomNumber * randomNumber) * Context.MAPS_ROWS)
+
       const panelSize = (ScreenHelper.UNIT * 6)
       const topMargin = ScreenHelper.UNIT * 2
-      const betweenMargin = (ScreenHelper.UNIT * 1)
-      const betweenMarginY = (ScreenHelper.UNIT * 4)
+      const betweenMargin = (ScreenHelper.UNIT * 2)
+      const betweenMarginY = (ScreenHelper.UNIT * 2)
 
-      if (indexX < cols[0]) {
-        mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX
-      }
-      else if (indexX < cols[0] + cols[1]) {
-        mapPanel.x = ScreenHelper.LEFT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - cols[0]) + betweenMargin * (indexX - cols[0])
-      }
-      else if (indexX < cols[0] + cols[1] + cols[2]) {
-        mapPanel.x = ScreenHelper.FRONT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 4 + panelSize * (indexX - (cols[0] + cols[1])) + betweenMargin * (indexX - (cols[0] + cols[1]))
-      }
-      else if (indexX < cols[0] + cols[1] + cols[2] + cols[3]) {
-        mapPanel.x = ScreenHelper.RIGHT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - (cols[0] + cols[1] + cols[2])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2]))
-      }
-      else {
-        mapPanel.x = ScreenHelper.BACK_SCREEN_RIGHT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * (indexX - (cols[0] + cols[1] + cols[2] + cols[3])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2] + cols[3]))
-      }
-
+      mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX + panelSize * (randomNumber * randomNumber)
       mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
-      // console.log(`[Main: addMapPanel]: ${ indexX } ${ ScreenHelper.BACK_SCREEN_LEFT_MARGIN }`)
 
       AppManager.mapGraphics.addChild(mapPanel)
       mapPanels.push(mapPanel)
-      mapPanel.Start()
+      // mapPanel.Start()
+      // console.log(`[Main] addPreloadMapPanel: ${mapPanels.length}`)
+
     }
 
     return mapPanels
@@ -548,56 +543,62 @@ export class AppManager {
   static async showMapPanel() {
     if (!AppManager) return
     if (!AppManager.mapPanels) return
+
+    if (this.titleText) this.titleText.alpha = 0
+
     let playlist: number[] = []
     for (let i = 0; i < AppManager.mapPanels.length; i++) {
       playlist.push(i)
     }
+    console.log(`[Main] showMapPanel:`)
 
-    playlist = this.shuffle(playlist)
-    if (this.titleText) this.titleText.alpha = 0
 
-    for (let time = 0; time < 4; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          map.Start();
-          map.alpha = 1
-        }
-      });
-      await this.sleep(5, () => {
-        console.log('next maps')
-      })
-    }
-    await this.sleep(5, () => {
-      console.log('next maps')
-    })
+    // const target = JSON.parse(JSON.stringify(playlist))
+    const target = playlist
+    target.forEach((index: number) => {
+      const mapIndex = target[index]
+      if (this.mapPanels) {
+        const map = this.mapPanels[mapIndex]
+        map.Start();
+        map.alpha = 1
+        // console.log(`[Main] showMapPanel:${mapIndex} ${map.rasterMap.id}`)
+      }
+    });
+    // await this.sleep(5, () => {
+    //   console.log('next maps')
+    // })
 
-    for (let i = 0; i < AppManager.length; i++) {
-      playlist.push(i)
-    }
-    playlist = this.shuffle(playlist)
+    // for (let i = 0; i < AppManager.length; i++) {
+    //   playlist.push(i)
+    // }
+    // playlist = this.shuffle(playlist)
 
-    const num = 7
-    for (let time = 0; time < num; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          // map.Start();
-          // map.alpha = 0
-        }
-      });
-      await this.sleep(0.05, () => {
-        console.log('next maps')
-      })
-    }
+    // const num = 7
+    // for (let time = 0; time < num; time++) {
+    //   const target = playlist.splice(0, Context.NUMBER_MAPS / num)
+    //   target.forEach(mapIndex => {
+    //     if (this.mapPanels) {
+    //       const map = this.mapPanels[mapIndex]
+    //       // map.Start();
+    //       // map.alpha = 0
+    //     }
+    //   });
+    //   await this.sleep(0.05, () => {
+    //     console.log('next maps')
+    //   })
+    // }
 
   }
 
 
   static update(): void {
     if (this.timeIndicator) this.timeIndicator.update()
+
+    if (AppManager.status === StatusType.HORIZONTAL) {
+      if (Clock.CheckSeconds()) {
+        console.log("[Main]: CheckSeconds")
+      }
+    }
   }
 
 }
