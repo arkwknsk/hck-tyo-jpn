@@ -271,7 +271,6 @@ export class AppManager {
     AppManager.rasterMaps = []
     for (let i = 0; i < Context.PRELOAD_MAPS; i++) {
       var rasterMap = await AppManager.createRasterMap(i)
-      AppManager.rasterMaps.push(rasterMap)
     }
     console.log(`[Main]: After preloadRasterMaps  ${AppManager.timeIndicator.toString()}`)
   }
@@ -287,8 +286,7 @@ export class AppManager {
       id: index, lat: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LNG, Context.MAX_LNG),
     }
     rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
-    // AppManager.rasterMaps.push(rasterMap)
-    // console.log(`[Main]: After createMapCopyCanvas ${rasterMap.lat},${rasterMap.lng} ${AppManager.timeIndicator.toString()}`)
+    AppManager.rasterMaps.push(rasterMap)
 
     return rasterMap
   }
@@ -564,30 +562,6 @@ export class AppManager {
         // console.log(`[Main] showMapPanel:${mapIndex} ${map.rasterMap.id}`)
       }
     });
-    // await this.sleep(5, () => {
-    //   console.log('next maps')
-    // })
-
-    // for (let i = 0; i < AppManager.length; i++) {
-    //   playlist.push(i)
-    // }
-    // playlist = this.shuffle(playlist)
-
-    // const num = 7
-    // for (let time = 0; time < num; time++) {
-    //   const target = playlist.splice(0, Context.NUMBER_MAPS / num)
-    //   target.forEach(mapIndex => {
-    //     if (this.mapPanels) {
-    //       const map = this.mapPanels[mapIndex]
-    //       // map.Start();
-    //       // map.alpha = 0
-    //     }
-    //   });
-    //   await this.sleep(0.05, () => {
-    //     console.log('next maps')
-    //   })
-    // }
-
   }
 
 
@@ -596,7 +570,7 @@ export class AppManager {
 
     if (AppManager.status === StatusType.HORIZONTAL) {
       if (Clock.CheckSeconds()) {
-        console.log("[Main]: CheckSeconds")
+        console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
       }
     }
   }
