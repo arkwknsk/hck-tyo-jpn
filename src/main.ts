@@ -270,7 +270,7 @@ export class AppManager {
     console.log("[Main]: Before preloadRasterMaps")
     AppManager.rasterMaps = []
     for (let i = 0; i < Context.PRELOAD_MAPS; i++) {
-      var rasterMap = await AppManager.createRasterMap(i)
+      await AppManager.createRasterMap(i)
     }
     console.log(`[Main]: After preloadRasterMaps  ${AppManager.timeIndicator.toString()}`)
   }
@@ -281,7 +281,10 @@ export class AppManager {
    * @param name - description
   */
   static async createRasterMap(index: number): Promise<RasterMap> {
-    const seed = `MathUtil.getSeed()${index}`
+    // const seed = `MathUtil.getSeed()${index}`
+    const seed = `${MathUtil.getSeed()}`
+    // console.log(`[Main]: createRasterMap seed:${seed}`)
+
     var rasterMap: RasterMap = {
       id: index, lat: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LNG, Context.MAX_LNG),
     }
@@ -416,6 +419,8 @@ export class AppManager {
         var mapElement = document.getElementById(mapID)
         if (mapElement) {
           let mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
+          console.log(`width:${mapCanvasElement.height}`)
+
           const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
 
           if (cacheCanvasElement) {
@@ -538,6 +543,38 @@ export class AppManager {
 
   }
 
+  static async addMapPanel(): Promise<MapPanel | void> {
+    if (!AppManager.mapGraphics) return
+    if (!AppManager.rasterMaps) return
+    console.log(`[Main] addMapPanel:`)
+
+    const rasterMap = await AppManager.createRasterMap(AppManager.rasterMaps.length)
+
+    const mapPanel = new MapPanel(rasterMap)
+    // mapPanel.alpha = 0
+
+    const indexX = (Context.MAPS_COLS)
+    const generator = seedrandom(MathUtil.getSeed());
+    const randomNumber = generator();
+
+    const indexY = Math.floor((randomNumber * randomNumber) * Context.MAPS_ROWS)
+
+    const panelSize = (ScreenHelper.UNIT * 6)
+    const topMargin = ScreenHelper.UNIT * 2
+    const betweenMarginY = (ScreenHelper.UNIT * 2)
+
+    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3;// + panelSize * (randomNumber * randomNumber)
+    mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
+
+    AppManager.mapGraphics.addChild(mapPanel)
+
+    mapPanel.alpha = 1.0
+    mapPanel.Start()
+
+    return mapPanel
+
+  }
+
   static async showMapPanel() {
     if (!AppManager) return
     if (!AppManager.mapPanels) return
@@ -570,6 +607,7 @@ export class AppManager {
 
     if (AppManager.status === StatusType.HORIZONTAL) {
       if (Clock.CheckSeconds()) {
+        AppManager.addMapPanel()
         console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
       }
     }

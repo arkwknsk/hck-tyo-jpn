@@ -76,13 +76,22 @@ export class MapPanel extends Graphics {
 
     const loadTexture = new Texture(new BaseTexture(this._rasterMap.image))
     const mapSprite = new Sprite(loadTexture)
-    mapSprite.x = 0
     mapSprite.y = ScreenHelper.UNIT * 2
-    mapSprite.width = ScreenHelper.UNIT * 6
+    mapSprite.width = ScreenHelper.UNIT * 6 * 1.33
     mapSprite.height = ScreenHelper.UNIT * 6
+    mapSprite.x = -((ScreenHelper.UNIT * 6 * 1.33) - ScreenHelper.UNIT * 6) * 0.5
     mapSprite.alpha = 0.0
+
+    const mask = new Graphics()
+    mask.beginFill(0xffffff);
+    mask.drawRect(0, 0, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6);
+    mask.endFill();
+    mask.y = mapSprite.y
+
+    mapSprite.mask = mask
     this.mapSprite = mapSprite
 
+    this.addChild(mask)
     this.addChild(mapSprite)
 
     const g = new Graphics()

@@ -8,10 +8,15 @@ export class Clock {
   // private static readonly SECOND = 1000;
 
   static CheckSeconds(): Boolean {
+    const nowDate = new Date();
     const now = new Date().getTime()
     if (now - Clock.prevTime > 1000) {
-      Clock._prevTime = now
-      return true
+      if (nowDate.getSeconds() % 5 === 0) {
+        Clock._prevTime = now
+        return true
+      } else {
+        return false
+      }
     }
     else {
       return false
