@@ -7,6 +7,7 @@ import { ScreenHelper } from './ScreenHelper';
 // import { MathUtil } from './MathUtil'
 
 export class MapPanel extends Graphics {
+  public readonly MAP_RATIO: number = 1.333
   private _rasterMap: RasterMap
   public get rasterMap(): RasterMap {
     return this._rasterMap
@@ -77,9 +78,9 @@ export class MapPanel extends Graphics {
     const loadTexture = new Texture(new BaseTexture(this._rasterMap.image))
     const mapSprite = new Sprite(loadTexture)
     mapSprite.y = ScreenHelper.UNIT * 2
-    mapSprite.width = ScreenHelper.UNIT * 6 * 1.33
+    mapSprite.width = ScreenHelper.UNIT * 6 * this.MAP_RATIO
     mapSprite.height = ScreenHelper.UNIT * 6
-    mapSprite.x = -((ScreenHelper.UNIT * 6 * 1.33) - ScreenHelper.UNIT * 6) * 0.5
+    mapSprite.x = -((ScreenHelper.UNIT * 6 * this.MAP_RATIO) - ScreenHelper.UNIT * 6) * 0.5
     mapSprite.alpha = 0.0
 
     const mask = new Graphics()

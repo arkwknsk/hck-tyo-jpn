@@ -419,7 +419,6 @@ export class AppManager {
         var mapElement = document.getElementById(mapID)
         if (mapElement) {
           let mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
-          console.log(`width:${mapCanvasElement.height}`)
 
           const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
 
@@ -602,12 +601,15 @@ export class AppManager {
   }
 
 
-  static update(): void {
+  static async update(): Promise<void> {
     if (this.timeIndicator) this.timeIndicator.update()
 
     if (AppManager.status === StatusType.HORIZONTAL) {
       if (Clock.CheckSeconds()) {
-        AppManager.addMapPanel()
+        const max = MathUtil.getRandomIntInclusiveSeed(MathUtil.getSeed(), 1, 3)
+        for (let i = 0; i < max; i++) {
+          await AppManager.addMapPanel()
+        }
         console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
       }
     }

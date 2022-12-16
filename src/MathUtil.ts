@@ -7,6 +7,15 @@ export class MathUtil {
     return Math.floor(Math.random() * (max - min + 1) + min) //The maximum is inclusive and the minimum is inclusive
   }
 
+  static getRandomIntInclusiveSeed(seed: string, min: number, max: number): number {
+    const generator = seedrandom(seed);
+    const randomNumber = generator();
+
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(randomNumber * (max - min + 1) + min) //The maximum is inclusive and the minimum is inclusive
+  }
+
   static getRandomInclusive(min: number, max: number): number {
     return Math.random() * (max - min + 1) + min //The maximum is inclusive and the minimum is inclusive
   }
