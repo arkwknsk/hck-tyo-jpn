@@ -1,5 +1,3 @@
-import { Context } from "./Context";
-
 export class Clock {
   private static _prevTime: number = 0
   public static get prevTime(): number {

@@ -1,5 +1,4 @@
 import { AppManager } from './main'
-import { gsap } from 'gsap';
 import { Graphics, Text } from 'pixi.js';
 // import { Context } from './Context';
 // import { MathUtil } from './MathUtil'

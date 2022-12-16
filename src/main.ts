@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, Graphics } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 // import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -42,7 +42,7 @@ export class AppManager {
 
   private static stats: Stats;
 
-  private static map: Map | undefined
+  // private static map: Map | undefined
   private static largeMap: Map | undefined
 
   private static rasterMaps: RasterMap[]
@@ -227,8 +227,10 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
 
-    const grids = ScreenHelper.GetGrids()
-    const layoutGrid = ScreenHelper.GetLayoutGrid()
+    // const grids = ScreenHelper.GetGrids()
+    // const layoutGrid = ScreenHelper.GetLayoutGrid()
+    ScreenHelper.GetGrids()
+    ScreenHelper.GetLayoutGrid()
     // if (AppManager.gridGraphics) {
     //   AppManager.gridGraphics.addChild(grids)
     //   AppManager.gridGraphics.addChild(layoutGrid)
@@ -305,22 +307,28 @@ export class AppManager {
       // mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.FRONT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
       mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.LEFT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN + ScreenHelper.SIDE_SCREEN * 2}px;height:${Context.STAGE_HEIGHT}px;`);
 
-      AppManager.largeMap = new Map({
-        "container": mapID,
-        center: [139.7873784, 35.6853717],
-        zoom: 13.0,
-        maxZoom: 17.99,
-        minZoom: 4,
-        "pitch": 0,
-        "maxPitch": 85,
-        "bearing": 0,
-        "hash": false,
-        "style": Blank as StyleSpecification
-      });
+      try {
+        AppManager.largeMap = new Map({
+          "container": mapID,
+          center: [139.7873784, 35.6853717],
+          zoom: 13.0,
+          maxZoom: 17.99,
+          minZoom: 4,
+          "pitch": 0,
+          "maxPitch": 85,
+          "bearing": 0,
+          "hash": false,
+          "style": Blank as StyleSpecification
+        });
+      } catch (error) {
+        reject()
+      }
 
-      AppManager.largeMap.on('load', function () {
-        resolve();
-      })
+      if (AppManager.largeMap) {
+        AppManager.largeMap.on('load', function () {
+          resolve();
+        })
+      }
     })
   }
 
@@ -453,11 +461,11 @@ export class AppManager {
     gsap.ticker.fps(30);
 
     if (!AppManager.largeMap) return
-    const tl = gsap.timeline({}).call(() => {
+    // eslint-disable-next-line no-unused-vars
+    gsap.timeline({}).call(() => {
       console.log(`[TL] START ${this.timeIndicator.toString()} `)
     })
       .call(() => {
-        // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
         AppManager.preloadRasterMaps()
         AppManager.zoomLargeMap(13.9)
       }, []
@@ -498,11 +506,6 @@ export class AppManager {
 
       }, []
         , "+=5")
-      .call(() => {
-        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
-      }, []
-        , "+=5"
-      )
   }
 
   static addPreloadMapPanel(): MapPanel[] {
@@ -552,17 +555,17 @@ export class AppManager {
     const mapPanel = new MapPanel(rasterMap)
     // mapPanel.alpha = 0
 
-    const indexX = (Context.MAPS_COLS)
+    // const indexX = (Context.MAPS_COLS)
     const generator = seedrandom(MathUtil.getSeed());
     const randomNumber = generator();
 
-    const indexY = Math.floor((randomNumber * randomNumber) * Context.MAPS_ROWS)
+    const indexY = Math.floor((randomNumber) * Context.MAPS_ROWS)
 
     const panelSize = (ScreenHelper.UNIT * 6)
     const topMargin = ScreenHelper.UNIT * 2
     const betweenMarginY = (ScreenHelper.UNIT * 2)
 
-    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3;// + panelSize * (randomNumber * randomNumber)
+    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN;// + panelSize * (randomNumber * randomNumber)
     mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
 
     AppManager.mapGraphics.addChild(mapPanel)
@@ -606,11 +609,8 @@ export class AppManager {
 
     if (AppManager.status === StatusType.HORIZONTAL) {
       if (Clock.CheckSeconds()) {
-        const max = MathUtil.getRandomIntInclusiveSeed(MathUtil.getSeed(), 1, 3)
-        for (let i = 0; i < max; i++) {
-          await AppManager.addMapPanel()
-        }
         console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
+        await AppManager.addMapPanel()
       }
     }
   }

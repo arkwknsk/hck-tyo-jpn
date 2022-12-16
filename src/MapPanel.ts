@@ -1,6 +1,6 @@
 import { AppManager } from './main'
 import { gsap } from 'gsap';
-import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle } from 'pixi.js';
+import { BaseTexture, Graphics, Sprite, Text, Texture, TextStyle, IPointData } from 'pixi.js';
 import { RasterMap } from './MapType';
 import { ScreenHelper } from './ScreenHelper';
 // import { Context } from './Context';
@@ -17,7 +17,8 @@ export class MapPanel extends Graphics {
   private _status: string = 'random'
   private _frameGraphics: Graphics | undefined
   private _corner: Graphics[] | undefined
-
+  private _cornerGraphics: Graphics | undefined
+  private _cornerGoals: IPointData[] | undefined
 
   private latValue = new Text()
   private lngValue = new Text()
@@ -27,7 +28,8 @@ export class MapPanel extends Graphics {
   private dispLngCursor: number = 0
   private dispLngCursorStep: number = 0
   private dispLngValue: string = ''
-  private counter: number = 0
+  // private counter: number = 0
+  // private frame: number = 0
 
   public constructor(rasterMaps: RasterMap) {
     super();
@@ -100,52 +102,62 @@ export class MapPanel extends Graphics {
       .drawRect(0, ScreenHelper.UNIT * 2, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6)
     this.addChild(g)
 
+    this._frameGraphics = g
+
     const c = new Graphics()
     c.lineStyle(1, 0xFFFFFF, 0.8)
       .moveTo(0, 0).lineTo(0, 10)
       .moveTo(0, 0).lineTo(10, 0)
 
 
+    this._cornerGraphics = new Graphics()
     this._corner = []
     for (let i = 0; i < 4; i++) {
       const target = c.clone()
       target.angle = i * 90
-      if (i < 2) {
-        target.x = (i % 2) * ScreenHelper.UNIT * 6
-      } else if (i == 2) {
-        target.x = ScreenHelper.UNIT * 6
-      } else {
-        target.x = 0
-      }
-      target.y = Math.floor(i / 2) * ScreenHelper.UNIT * 6 + ScreenHelper.UNIT * 2
+      target.x = 0
+      target.y = ScreenHelper.UNIT * 2
 
       this._corner.push(target)
 
-      this.addChild(target)
+      this._cornerGraphics.addChild(target)
     }
+    this.addChild(this._cornerGraphics)
+    this.calcMapCorner()
   }
-
 
   public Start(): void {
     if (!this._rasterMap) return
-    if (this.mapSprite) {
+    if (this.mapSprite && this._corner) {
       // this.counter = 0
       // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
-      gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
-        .from(this, { counter: 0 })
-        .to(this, {
-          counter: 1, duration: 2.0, onComplete: () => {
-            this._status = 'toFix'
-          }
-        })
-        .from(this, { counter: 0 })
-        .to(this, {
-          counter: 1, duration: 0.25, onComplete: () => {
-            this._status = 'map'
-          }
-        })
+      if (this._frameGraphics) this._frameGraphics.alpha = 0.0
+      this._status = 'random'
+      const tl = gsap.timeline({ defaults: { delay: 0, duration: 1.0 } })
         .call(() => {
-          if (this.mapSprite) this.mapSprite.alpha = 0.5
+          this._status = 'toFix'
+        }, [], "1.0")
+
+      if (this._cornerGoals) {
+        for (let i = 0; i < 4; i++) {
+          tl.to(this._corner[i], { duration: 2.0, x: this._cornerGoals[i].x, y: this._cornerGoals[i].y }, "1.0")
+        }
+      }
+      tl
+        .call(() => {
+          if (this._frameGraphics) {
+            this._frameGraphics.alpha = 1.0
+            this._status = 'fixed'
+          }
+        }, [], ">")
+        .call(() => {
+          this._status = 'toMap'
+        }, [], "+=0.5")
+        .call(() => {
+          this._status = 'map'
+        }, [], ">0.25")
+        .call(() => {
+          // if (this.mapSprite) this.mapSprite.alpha = 0.5
         })
     }
     if (AppManager) {
@@ -157,27 +169,79 @@ export class MapPanel extends Graphics {
 
   private update = (): void => {
     if (this.latValue) {
-      if (this._status === 'random' || this._status === 'toFix') {
+      if (this._status === 'random' || this._status === 'toFix' || this._status === 'fixed' || this._status === 'toMap') {
         this.dispLatValue = MapPanel.getRandomString(this._rasterMap.lat, this.dispLatCursor)
         this.latValue.text = this.dispLatValue
         this.dispLngValue = MapPanel.getRandomString(this._rasterMap.lng, this.dispLngCursor)
         this.lngValue.text = this.dispLngValue
+        if (this._frameGraphics && this._cornerGraphics) {
+          this._cornerGraphics.alpha = (this._cornerGraphics.alpha === 0.9) ? 0.1 : 0.9
+        }
       }
     }
     if (this._status === 'random') {
-    } else if (this._status === 'toFix') {
       if (AppManager.app) {
-        // if (AppManager.app.ticker.lastTime > this.prevTime + 50) {
-        //   this.prevTime = AppManager.app.ticker.lastTime
         this.dispLatCursor += this.dispLatCursorStep;
         this.dispLngCursor += this.dispLngCursorStep;
         // }
       }
-
+    } else if (this._status === 'toFix') {
+      if (AppManager.app) {
+        this.dispLatCursor += this.dispLatCursorStep;
+        this.dispLngCursor += this.dispLngCursorStep;
+        // }
+      }
+    } else if (this._status === 'fixed') {
+      if (this._frameGraphics && this._cornerGraphics) {
+        this._frameGraphics.alpha = (this._frameGraphics.alpha === 1) ? 0.1 : 1
+        // this._cornerGraphics.alpha = (this._cornerGraphics.alpha === 0.9) ? 0.1 : 0.9
+      }
+    } else if (this._status === 'toMap') {
+      if (this.mapSprite) {
+        this.mapSprite.alpha = (this.mapSprite.alpha === 0.5) ? 0.1 : 0.5
+        // this.mapSprite.angle += 1
+        // this.mapSprite.anchor.x = this.mapSprite.anchor.y = 0.5
+      }
+      if (this._cornerGraphics) {
+        this._cornerGraphics.alpha = (this._cornerGraphics.alpha === 0.9) ? 0.1 : 0.9
+      }
+    } else if (this._status === 'map') {
+      if (this.mapSprite) this.mapSprite.alpha = 0.5
+      if (this._frameGraphics) this._frameGraphics.alpha = 0.5
+      if (this._cornerGraphics) {
+        this._cornerGraphics.alpha = 0.9
+      }
+    } else {
+      if (this._frameGraphics && this._cornerGraphics) {
+        this._frameGraphics.alpha = 0.5
+        this._cornerGraphics.alpha = 0.9
+      }
     }
     // this.x += 0.25;
-    this.x += 1;
+    if (this._status === 'random') {
+      this.x += 2;
+    } else {
+      this.x += 1;
+    }
     // console.log(this)
+  }
+
+  calcMapCorner(): void {
+    this._cornerGoals = []
+    if (!this._corner) return;
+    for (let i = 0; i < 4; i++) {
+      let x: number
+
+      if (i < 2) {
+        x = (i % 2) * ScreenHelper.UNIT * 6
+      } else if (i == 2) {
+        x = ScreenHelper.UNIT * 6
+      } else {
+        x = 0
+      }
+      const y = Math.floor(i / 2) * ScreenHelper.UNIT * 6 + ScreenHelper.UNIT * 2
+      this._cornerGoals.push({ x, y })
+    }
   }
 
   static getRandomString(value: number, cursor: number): string {
