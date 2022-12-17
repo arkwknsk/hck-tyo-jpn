@@ -70,7 +70,7 @@ export class MosaicMap extends Graphics {
 
         const seed = `${MathUtil.getSeed()}${i}${i}`
         // const col = MathUtil.getRandomIntInclusiveSeed(seed, 0, Context.MOSAIC_COLS)
-        const row = MathUtil.getRandomIntInclusiveSeed(seed, 0, Context.MOSAIC_ROWS)
+        const row = MathUtil.getRandomIntSeed(seed, 0, Context.MOSAIC_ROWS)
 
         const x = Math.floor(i % Context.MOSAIC_COLS) * mosaicWidth
         // const x = col * mosaicWidth

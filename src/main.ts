@@ -90,7 +90,7 @@ export class AppManager {
   static init = async () => {
     new AppManager()
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(AppManager.stats.dom);
+    // document.body.appendChild(AppManager.stats.dom);
 
     AppManager.status = StatusType.OP
 
@@ -252,7 +252,7 @@ export class AppManager {
     // }
 
     this.timeIndicator.x = ScreenHelper.FRONT_SCREEN_LEFT
-    AppManager.gridGraphics.addChild(this.timeIndicator)
+    // AppManager.gridGraphics.addChild(this.timeIndicator)
 
     AppManager.app.ticker.add(() => {
       try {
@@ -521,14 +521,14 @@ export class AppManager {
 
       }, []
         , "+=5")
-      .call(() => {
-        console.log(`[TL] ${this.timeIndicator.toString()} 15:00   ${AppManager.timeIndicator.msDiff}`)
-        AppManager.toMosaic()
-      }, [], `${15 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
-      .call(() => {
-        console.log(`[TL] ${this.timeIndicator.toString()} 20:00   ${AppManager.timeIndicator.msDiff}`)
-        AppManager.toHorizontal()
-      }, [], `${20 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      // .call(() => {
+      //   console.log(`[TL] ${this.timeIndicator.toString()} 15:00   ${AppManager.timeIndicator.msDiff}`)
+      //   AppManager.toMosaic()
+      // }, [], `${15 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      // .call(() => {
+      //   console.log(`[TL] ${this.timeIndicator.toString()} 20:00   ${AppManager.timeIndicator.msDiff}`)
+      //   AppManager.toHorizontal()
+      // }, [], `${20 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
       .call(() => {
         console.log(`[TL] ${this.timeIndicator.toString()} 30:00   ${AppManager.timeIndicator.msDiff}`)
         AppManager.toMosaic()
