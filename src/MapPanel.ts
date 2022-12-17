@@ -13,7 +13,10 @@ export class MapPanel extends Graphics {
     return this._rasterMap
   }
   private _mapArea: Graphics | undefined
-  private mapSprite: Sprite | undefined
+  private _mapSprite: Sprite | undefined
+  public get mapSprite(): Sprite | undefined {
+    return this._mapSprite
+  }
   private _status: string = 'random'
   private _frameGraphics: Graphics | undefined
   private _corner: Graphics[] | undefined
@@ -60,7 +63,7 @@ export class MapPanel extends Graphics {
       fontFamily: "Lekton Regular",
       fontWeight: '400',
       fill: 0xffffff,
-      fontSize: 12,
+      fontSize: 11,
       letterSpacing: 0
       , align: 'left',
     })
@@ -73,7 +76,7 @@ export class MapPanel extends Graphics {
 
     this.lngValue = new Text('', style);
     this.lngValue.x = 0
-    this.lngValue.y = ScreenHelper.UNIT / 2 + ScreenHelper.UNIT / 2 + 18
+    this.lngValue.y = ScreenHelper.UNIT / 2 + ScreenHelper.UNIT / 2 + 16
     this.lngValue.text = this._rasterMap.lng.toString()
     this.addChild(this.lngValue);
 
@@ -92,7 +95,7 @@ export class MapPanel extends Graphics {
     mask.y = mapSprite.y
 
     mapSprite.mask = mask
-    this.mapSprite = mapSprite
+    this._mapSprite = mapSprite
 
     this.addChild(mask)
     this.addChild(mapSprite)
@@ -128,7 +131,7 @@ export class MapPanel extends Graphics {
 
   public Start(): void {
     if (!this._rasterMap) return
-    if (this.mapSprite && this._corner) {
+    if (this._mapSprite && this._corner) {
       // this.counter = 0
       // const tl = gsap.timeline({ defaults: { duration: 1.0, ease: "power4.out" } })
       if (this._frameGraphics) this._frameGraphics.alpha = 0.0
@@ -197,8 +200,8 @@ export class MapPanel extends Graphics {
         // this._cornerGraphics.alpha = (this._cornerGraphics.alpha === 0.9) ? 0.1 : 0.9
       }
     } else if (this._status === 'toMap') {
-      if (this.mapSprite) {
-        this.mapSprite.alpha = (this.mapSprite.alpha === 0.5) ? 0.1 : 0.5
+      if (this._mapSprite) {
+        this._mapSprite.alpha = (this._mapSprite.alpha === 0.5) ? 0.1 : 0.5
         // this.mapSprite.angle += 1
         // this.mapSprite.anchor.x = this.mapSprite.anchor.y = 0.5
       }
@@ -206,7 +209,7 @@ export class MapPanel extends Graphics {
         this._cornerGraphics.alpha = (this._cornerGraphics.alpha === 0.9) ? 0.1 : 0.9
       }
     } else if (this._status === 'map') {
-      if (this.mapSprite) this.mapSprite.alpha = 0.5
+      if (this._mapSprite) this._mapSprite.alpha = 0.5
       if (this._frameGraphics) this._frameGraphics.alpha = 0.5
       if (this._cornerGraphics) {
         this._cornerGraphics.alpha = 0.9
@@ -218,11 +221,11 @@ export class MapPanel extends Graphics {
       }
     }
     // this.x += 0.25;
-    if (this._status === 'random') {
-      this.x += 2;
-    } else {
-      this.x += 1;
-    }
+    // if (this._status === 'random') {
+    //   this.x += 2;
+    // } else {
+    //   this.x += 1;
+    // }
     // console.log(this)
   }
 

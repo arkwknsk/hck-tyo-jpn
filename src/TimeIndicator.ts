@@ -9,7 +9,7 @@ export class TimeIndicator extends Graphics {
   private secText = new Text()
   private msecText = new Text()
   private static textStyle: TextStyle = new TextStyle({
-    fontFamily: "Inter Regular",
+    fontFamily: "Lekton Regular",
     fontWeight: '400',
     fill: 0xffffff,
     fontSize: 96,

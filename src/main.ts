@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, Graphics } from 'pixi.js';
+import { Container, Application, Assets, Graphics, RenderTexture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 // import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -12,6 +12,7 @@ import { MapPanel } from './MapPanel'
 import { Title } from './Title'
 import { TimeIndicator } from './TimeIndicator'
 import { Clock } from './Clock'
+import { MosaicMap } from './MosaicMap'
 import seedrandom from 'seedrandom'
 
 import './main.css';
@@ -19,13 +20,17 @@ import './reset.css';
 
 const StatusType = {
   OP: "op",
-  HORIZONTAL: "Horizontal",
-  Hearts: "hearts",
+  HORIZONTAL: "horizontal",
+  MOSAIC: "mosaic",
   Spades: "spades",
 } as const;
 
 type StatusType = typeof StatusType[keyof typeof StatusType];
 
+type Position = {
+  x: number,
+  y: number
+}
 
 /**
  * Main Class
@@ -36,9 +41,11 @@ export class AppManager {
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
   private static titleText: Title | undefined
-  private static mapPanels: MapPanel[] | undefined
+  public static mapPanels: MapPanel[] | undefined
   private static timeIndicator: TimeIndicator
   private static mapMasks: HTMLDivElement[] | undefined
+  private static mosaicMap: MosaicMap | undefined
+  private static mosaicMapContainer: Container | undefined
 
   private static stats: Stats;
 
@@ -50,6 +57,8 @@ export class AppManager {
   private static withoutRoadStyle: StyleSpecification | undefined
 
   private static startTime: Date
+
+  private static prevPosition: Position[]
 
 
 
@@ -212,7 +221,7 @@ export class AppManager {
       AppManager.app.stage.sortableChildren = true
     }
 
-    await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
+    // await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
     await Assets.load("Inter-Regular.ttf").catch((error) => { console.log(error.message); });;
     await Assets.load("Lekton-Regular.ttf").catch((error) => { console.log(error.message); });;
     console.log("[Main]: Loaded fonts")
@@ -220,6 +229,12 @@ export class AppManager {
 
     AppManager.mapGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.mapGraphics)
+
+    AppManager.mosaicMapContainer = new Container()
+    AppManager.app.stage.addChild(AppManager.mosaicMapContainer)
+
+    this.mosaicMap = new MosaicMap()
+    AppManager.mosaicMapContainer.addChild(this.mosaicMap)
 
     AppManager.graphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.graphics)
@@ -478,7 +493,7 @@ export class AppManager {
       .call(() => {
         if (AppManager.titleText) AppManager.titleText.toFix()
       }, []
-        , `+= ${3.0 - AppManager.timeIndicator.sDiff} ` //Fixed discrepancy between app start time and timeline start time. アプリ起動時刻とtimelineがスタートした時刻のズレを補正
+        , `${3.0 - AppManager.timeIndicator.sDiff}` //Fixed discrepancy between app start time and timeline start time. アプリ起動時刻とtimelineがスタートした時刻のズレを補正
       )
       .call(() => {
         if (AppManager.mapMasks) {
@@ -506,6 +521,38 @@ export class AppManager {
 
       }, []
         , "+=5")
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 15:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${15 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 20:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${20 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 30:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${30 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 35:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${35 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 45:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${45 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 50:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${50 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 60:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${60 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 65:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${65 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
   }
 
   static addPreloadMapPanel(): MapPanel[] {
@@ -565,7 +612,7 @@ export class AppManager {
     const topMargin = ScreenHelper.UNIT * 2
     const betweenMarginY = (ScreenHelper.UNIT * 2)
 
-    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN;// + panelSize * (randomNumber * randomNumber)
+    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + (panelSize * (Context.MAPS_COLS * randomNumber))
     mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
 
     AppManager.mapGraphics.addChild(mapPanel)
@@ -605,14 +652,95 @@ export class AppManager {
 
 
   static async update(): Promise<void> {
-    if (this.timeIndicator) this.timeIndicator.update()
+    if (this.timeIndicator) {
+      this.timeIndicator.update()
+
+      // const sDiff = this.timeIndicator.sDiff
+      // console.log(`[Main]:${AppManager.timeIndicator.toString()} ${sDiff}`)
+
+    }
 
     if (AppManager.status === StatusType.HORIZONTAL) {
-      if (Clock.CheckSeconds()) {
-        console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
-        await AppManager.addMapPanel()
+      if (AppManager.mapPanels) {
+        if (Clock.CheckSeconds()) {
+          console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
+          for (let i = 0; i < 10; i++) {
+            const mapPanel = await AppManager.addMapPanel()
+            if (mapPanel) AppManager.mapPanels.push(mapPanel)
+          }
+        }
+
+        AppManager.mapPanels.forEach(element => {
+          element.x += 1.0;
+        })
+
+      };
+
+    }
+    else if (AppManager.status === StatusType.MOSAIC) {
+      if (AppManager.mosaicMap) {
+        AppManager.mosaicMap.x += 1
       }
     }
+  }
+
+  static toHorizontal(): void {
+    AppManager.status = StatusType.HORIZONTAL
+    console.log(`[Main]:${AppManager.timeIndicator.toString()} toHorizontal ${AppManager.rasterMaps.length}`)
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.visible = false
+    }
+    if (AppManager.mapGraphics) AppManager.mapGraphics.visible = true
+    // if (AppManager.mapPanels) {
+    //   for (let i = 0; i < AppManager.mapPanels.length; i++) {
+    //     const mapPanel = AppManager.mapPanels[i]
+    //     mapPanel.x = AppManager.prevPosition[i].x
+    //     mapPanel.y = AppManager.prevPosition[i].y
+    //     mapPanel.scale.x = mapPanel.scale.y = 1.0;
+    //   }
+    // }
+
+  }
+
+
+  static toMosaic(): void {
+    AppManager.status = StatusType.MOSAIC
+    console.log(`[Main]:${AppManager.timeIndicator.toString()} toMosaic ${AppManager.rasterMaps.length}`)
+    if (!AppManager.mapPanels) return
+
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.visible = true
+      AppManager.mosaicMap.x = -200
+    }
+
+    const textures: RenderTexture[] = []
+
+    // const renderer = autoDetectRenderer({ width: 600, height: 600 })
+    AppManager.prevPosition = []
+
+    AppManager.mapPanels.forEach(mapPanel => {
+      if (this.app) {
+        const renderTexture = RenderTexture.create({ width: ScreenHelper.UNIT * 6, height: ScreenHelper.UNIT * 8 })
+        // renderTexture.frame = new Rectangle(0, ScreenHelper.UNIT * 2, ScreenHelper.UNIT * 6, ScreenHelper.UNIT * 6)
+
+        const prevPos: Position = { x: mapPanel.x, y: mapPanel.y }
+        AppManager.prevPosition.push({ x: mapPanel.x, y: mapPanel.y })
+        mapPanel.x = 0
+        mapPanel.y = 0
+        if (renderTexture && mapPanel.mapSprite) this.app.renderer.render(mapPanel, { renderTexture })
+        mapPanel.x = prevPos.x
+        mapPanel.y = prevPos.y
+
+        textures.push(renderTexture)
+      }
+    });
+
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.textures = textures
+      AppManager.mosaicMap.draw()
+    }
+    if (AppManager.mapGraphics) AppManager.mapGraphics.visible = false
+
   }
 
 }
