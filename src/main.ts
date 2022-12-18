@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { Map, StyleSpecification } from 'maplibre-gl';
-import { Application, Assets, BaseTexture, Graphics, Sprite, Texture } from 'pixi.js';
+import { Container, Application, Assets, Graphics, RenderTexture } from 'pixi.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 // import Tweakpane from "tweakpane";
 import Blank from './assets/o186ulfx6.json';
@@ -11,10 +11,26 @@ import { MathUtil } from './MathUtil'
 import { MapPanel } from './MapPanel'
 import { Title } from './Title'
 import { TimeIndicator } from './TimeIndicator'
+import { Clock } from './Clock'
+import { MosaicMap } from './MosaicMap'
 import seedrandom from 'seedrandom'
 
 import './main.css';
 import './reset.css';
+
+const StatusType = {
+  OP: "op",
+  HORIZONTAL: "horizontal",
+  MOSAIC: "mosaic",
+  Spades: "spades",
+} as const;
+
+type StatusType = typeof StatusType[keyof typeof StatusType];
+
+type Position = {
+  x: number,
+  y: number
+}
 
 /**
  * Main Class
@@ -25,20 +41,38 @@ export class AppManager {
   private static mapGraphics: Graphics | undefined
   private static gridGraphics: Graphics | undefined
   private static titleText: Title | undefined
-  private static mapPanels: MapPanel[] | undefined
+  public static mapPanels: MapPanel[] | undefined
   private static timeIndicator: TimeIndicator
   private static mapMasks: HTMLDivElement[] | undefined
+  private static mosaicMap: MosaicMap | undefined
+  private static mosaicMapContainer: Container | undefined
 
   private static stats: Stats;
 
-  private static map: Map | undefined
+  // private static map: Map | undefined
   private static largeMap: Map | undefined
 
   private static rasterMaps: RasterMap[]
 
   private static withoutRoadStyle: StyleSpecification | undefined
 
-  private static startTime: Date;
+  private static startTime: Date
+
+  private static prevPosition: Position[]
+
+  private static mosaicDrawCounter: number = 0
+
+
+
+  /**
+   * Direction Status 演出ステータス
+   *
+   * @private
+   * @static
+   * @type {string}
+   * @memberof AppManager
+   */
+  private static status: StatusType
 
   static readonly INPUTS = {
     fpsMonitor: false,
@@ -58,19 +92,15 @@ export class AppManager {
   static init = async () => {
     new AppManager()
     AppManager.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild(AppManager.stats.dom);
+    // document.body.appendChild(AppManager.stats.dom);
 
-    //ISO 2022-12-11T03:20:02.885Z
-    const exp = /(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z/
-    const iso: string = `${AppManager.startTime.toISOString()}`
-    const result = iso.match(exp)
-    if (result) {
-      const seed = result.slice(1, result.length).join('')
-      console.log(`[Main]: seed:${seed}`)
-      const generator = seedrandom(seed);
-      const randomNumber = generator();
-      console.log(`[Main]: randomNumber:${randomNumber}`)
-    }
+    AppManager.status = StatusType.OP
+
+    const seed = MathUtil.getSeed()
+    console.log(`[Main]: seed:${seed}`)
+    const generator = seedrandom(seed);
+    const randomNumber = generator();
+    console.log(`[Main]: randomNumber:${randomNumber}`)
 
     /*
     const style = {
@@ -136,8 +166,15 @@ export class AppManager {
     });
     */
     this.initMaskMap()
+
+    const layers = AppManager.filterLayer()
+    // console.debug(layers);
+    // Blank.layers = layers
+    AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
+    AppManager.withoutRoadStyle.layers = layers
+
     await this.initPIXI()
-    // await this.initCacheCanvas()
+    await this.initCacheCanvas()
 
     if (AppManager.titleText) {
       AppManager.titleText.visible = true
@@ -186,13 +223,20 @@ export class AppManager {
       AppManager.app.stage.sortableChildren = true
     }
 
-    await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
+    // await Assets.load("Inter-Medium.ttf").catch((error) => { console.log(error.message); });;
     await Assets.load("Inter-Regular.ttf").catch((error) => { console.log(error.message); });;
+    await Assets.load("Lekton-Regular.ttf").catch((error) => { console.log(error.message); });;
     console.log("[Main]: Loaded fonts")
 
 
     AppManager.mapGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.mapGraphics)
+
+    AppManager.mosaicMapContainer = new Container()
+    AppManager.app.stage.addChild(AppManager.mosaicMapContainer)
+
+    this.mosaicMap = new MosaicMap()
+    AppManager.mosaicMapContainer.addChild(this.mosaicMap)
 
     AppManager.graphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.graphics)
@@ -202,13 +246,15 @@ export class AppManager {
 
     const grids = ScreenHelper.GetGrids()
     const layoutGrid = ScreenHelper.GetLayoutGrid()
+    // ScreenHelper.GetGrids()
+    // ScreenHelper.GetLayoutGrid()
     if (AppManager.gridGraphics) {
       AppManager.gridGraphics.addChild(grids)
       AppManager.gridGraphics.addChild(layoutGrid)
     }
 
     this.timeIndicator.x = ScreenHelper.FRONT_SCREEN_LEFT
-    AppManager.gridGraphics.addChild(this.timeIndicator)
+    // AppManager.gridGraphics.addChild(this.timeIndicator)
 
     AppManager.app.ticker.add(() => {
       try {
@@ -235,28 +281,36 @@ export class AppManager {
 
   }
 
-  static async createCacheMaps(): Promise<void> {
-    const layers = AppManager.filterLayer()
-    // console.debug(layers);
-    // Blank.layers = layers
-    AppManager.withoutRoadStyle = JSON.parse(JSON.stringify(Blank)) as StyleSpecification
-    AppManager.withoutRoadStyle.layers = layers
-
-
-    console.log("[Main]: Before createMapCopyCanvas")
-    // await this.initMap()
+  /**
+   * preload 
+   * 
+   */
+  static async preloadRasterMaps(): Promise<void> {
+    console.log("[Main]: Before preloadRasterMaps")
     AppManager.rasterMaps = []
-    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
-      var rasterMap: RasterMap = {
-        id: i, lat: MathUtil.getRandomInclusive(Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusive(Context.MIN_LNG, Context.MAX_LNG),
-
-      }
-      rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
-      AppManager.rasterMaps.push(rasterMap)
-      // console.log(`${rasterMap.id} ${rasterMap.lat} ${rasterMap.lng}`)
+    for (let i = 0; i < Context.PRELOAD_MAPS; i++) {
+      await AppManager.createRasterMap(i)
     }
-    console.log(`[Main]: After createMapCopyCanvas  ${AppManager.timeIndicator.toString()}`)
+    console.log(`[Main]: After preloadRasterMaps  ${AppManager.timeIndicator.toString()}`)
+  }
 
+  /**
+   * 地図のラスター形式のキャッシュを生成
+   *
+   * @param name - description
+  */
+  static async createRasterMap(index: number): Promise<RasterMap> {
+    // const seed = `MathUtil.getSeed()${index}`
+    const seed = `${MathUtil.getSeed()}`
+    // console.log(`[Main]: createRasterMap seed:${seed}`)
+
+    var rasterMap: RasterMap = {
+      id: index, lat: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LAT, Context.MAX_LAT), lng: MathUtil.getRandomInclusiveSeed(seed, Context.MIN_LNG, Context.MAX_LNG),
+    }
+    rasterMap.image = await AppManager.createMapCopyCanvas(rasterMap.id, rasterMap.lat, rasterMap.lng)
+    AppManager.rasterMaps.push(rasterMap)
+
+    return rasterMap
   }
 
   static async createLargeMap(): Promise<void> {
@@ -270,22 +324,28 @@ export class AppManager {
       // mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.FRONT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN}px;height:${Context.STAGE_HEIGHT}px;`);
       mapElement.setAttribute("style", `opacity:0.5;z-index:10;position:absolute;top:0;left:${ScreenHelper.LEFT_SCREEN_LEFT}px;width:${ScreenHelper.LARGE_SCREEN + ScreenHelper.SIDE_SCREEN * 2}px;height:${Context.STAGE_HEIGHT}px;`);
 
-      AppManager.largeMap = new Map({
-        "container": mapID,
-        center: [139.7873784, 35.6853717],
-        zoom: 13.0,
-        maxZoom: 17.99,
-        minZoom: 4,
-        "pitch": 0,
-        "maxPitch": 85,
-        "bearing": 0,
-        "hash": false,
-        "style": Blank as StyleSpecification
-      });
+      try {
+        AppManager.largeMap = new Map({
+          "container": mapID,
+          center: [139.7873784, 35.6853717],
+          zoom: 13.0,
+          maxZoom: 17.99,
+          minZoom: 4,
+          "pitch": 0,
+          "maxPitch": 85,
+          "bearing": 0,
+          "hash": false,
+          "style": Blank as StyleSpecification
+        });
+      } catch (error) {
+        reject()
+      }
 
-      AppManager.largeMap.on('load', function () {
-        resolve();
-      })
+      if (AppManager.largeMap) {
+        AppManager.largeMap.on('load', function () {
+          resolve();
+        })
+      }
     })
   }
 
@@ -321,7 +381,8 @@ export class AppManager {
    * @returns フィルタリング後のレイヤー
    */
   static filterLayer(): any {
-    const wantLayer = ['building', 'structurea', 'structurel', 'wstructurea']
+    const wantLayer = ['building', 'structurea', 'structurel']
+    // const wantLayer = ['road']
     const evenValues = Blank.layers.filter((value) => {
       if (value["source-layer"] !== undefined) {
         if (wantLayer.includes(value["source-layer"])) {
@@ -342,23 +403,26 @@ export class AppManager {
   static initCacheCanvas(): Promise<void> {
     return new Promise<void>((resolve) => {
       const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
-      cacheCanvasElement.setAttribute('width', (Context.MAP_WIDTH * 2 * 10).toString())
-      cacheCanvasElement.setAttribute('height', (Context.MAP_HEIGHT * 2).toString());
-      cacheCanvasElement.setAttribute("style", `position:absolute;top:1080px;width:1000px;left:0px;`);
+      const w = (Context.MAP_WIDTH * 2 * 10).toString()
+      const h = (Context.MAP_HEIGHT * 2).toString()
+      cacheCanvasElement.setAttribute('width', w)
+      cacheCanvasElement.setAttribute('height', h);
+      cacheCanvasElement.setAttribute("style", `position: absolute; top: 1080px;left: 0px;`);
 
       resolve()
     })
   }
 
   static createMapCopyCanvas(index: number, lat: number, lng: number): Promise<HTMLImageElement> {
+    // console.log(`[Main] createMapCopyCanvas ${lat},${lng}`)
     return new Promise<HTMLImageElement>((resolve, reject) => {
       var mapElement = document.createElement('div')
       document.body.appendChild(mapElement);
-      // const mapID = `map${index}`
-      const mapID = `map-small`
+      // const mapID = `map${ index } `
+      const mapID = `map-small-${index}`
       mapElement.setAttribute("id", mapID)
       const left = 0
-      mapElement.setAttribute("style", `z-index:-1000;position:absolute;top:0;left:${left}px;width:${Context.MAP_WIDTH * 2}px;height:${Context.MAP_HEIGHT * 2}px;`);
+      mapElement.setAttribute("style", `z - index: -1000; position: absolute; top: 0; left:${left} px; width:${Context.MAP_WIDTH * 2} px; height:${Context.MAP_HEIGHT * 2} px; `);
 
       const map = new Map({
         "container": mapID,
@@ -375,10 +439,12 @@ export class AppManager {
       });
 
       map.once('load', () => {
+        // console.log(`index:${index} ${mapID}`)
         let data: string;
         var mapElement = document.getElementById(mapID)
         if (mapElement) {
           let mapCanvasElement = mapElement.firstElementChild?.firstElementChild as HTMLCanvasElement
+
           const cacheCanvasElement = document.getElementById('cacheCanvas') as HTMLCanvasElement;
 
           if (cacheCanvasElement) {
@@ -389,6 +455,7 @@ export class AppManager {
               img.src = data
 
               cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, Context.MAP_WIDTH * 2 * index, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2)
+              // cacheCanvasContext.drawImage(img, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT * 2, 0, 0, Context.MAP_WIDTH * 2, Context.MAP_HEIGHT)
               document.body.removeChild(mapElement)
               map.remove()
               resolve(img)
@@ -405,46 +472,17 @@ export class AppManager {
     });
   }
 
-  static addRasterMap() {
-    let i = 0
-    const cols = Context.MAPS_COLS
-    const rows = Context.MAPS_ROWS
-    const scale = 0.5
-    const marginY = (Context.STAGE_HEIGHT - Context.MAP_HEIGHT * scale * rows) / (rows + 1)
-    const marginX = (Context.STAGE_WIDTH - Context.MAP_WIDTH * scale * cols) / (cols + 1)
-    AppManager.rasterMaps.forEach(item => {
-      console.log("[Main] addRasterMap")
-      if (AppManager.mapGraphics) {
-        const loadTexture = new Texture(new BaseTexture(item.image))
-        const loadSprite = new Sprite(loadTexture)
-        // loadSprite.anchor.set(0.5)
-        loadSprite.x = marginX + (i % cols) * Context.MAP_WIDTH * scale + marginX * (i % cols)
-
-        loadSprite.y = marginY + Math.floor(i / cols) * Context.MAP_HEIGHT * scale + marginY * Math.floor(i / cols)
-        // loadSprite.y = 100
-        // console.log(`[Main] addRasterMap  ${item.id} ${loadSprite.x} , ${loadSprite.y}  ${Math.floor(i / cols)}`)
-
-        loadSprite.width = Context.MAP_WIDTH * 0.75
-        loadSprite.height = Context.MAP_HEIGHT * 0.75
-        AppManager.mapGraphics.addChild(loadSprite)
-      }
-
-      i++
-    });
-  }
-
   static async initTimeline(): Promise<void> {
     console.log("[Main] initTimeline")
 
     gsap.ticker.fps(30);
 
     if (!AppManager.largeMap) return
-    const tl = gsap.timeline({}).call(() => {
-      console.log(`[TL] START ${this.timeIndicator.toString()}`)
+    gsap.timeline({}).call(() => {
+      console.log(`[TL] START ${this.timeIndicator.toString()} `)
     })
       .call(() => {
-        // AppManager.largeMap?.flyTo({ curve: 1.0, speed: 0.2, zoom: 5.0, maxDuration: 10000 })
-        AppManager.createCacheMaps()
+        AppManager.preloadRasterMaps()
         AppManager.zoomLargeMap(13.9)
       }, []
         , "0")
@@ -456,147 +494,265 @@ export class AppManager {
       .call(() => {
         if (AppManager.titleText) AppManager.titleText.toFix()
       }, []
-        , `+=${3.0 - AppManager.timeIndicator.sDiff}`
+        , `${3.0 - AppManager.timeIndicator.sDiff}` //Fixed discrepancy between app start time and timeline start time. アプリ起動時刻とtimelineがスタートした時刻のズレを補正
       )
       .call(() => {
         if (AppManager.mapMasks) {
           for (let i = 0; i < AppManager.mapMasks.length; i++) {
             const mask = AppManager.mapMasks[i]
-            mask.setAttribute("style", `display:none`);
+            mask.setAttribute("style", `display: none`);
           }
         }
 
         if (AppManager.titleText) AppManager.titleText.toFix()
-        AppManager.largeMap?.jumpTo({ zoom: 14.0 })
-        AppManager.zoomLargeMap(14.9)
+        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
+        // AppManager.zoomLargeMap(14.9)
       }, []
         , "+=1.5"
       )
       .call(() => {
         // if (AppManager.largeMap) AppManager.largeMap.remove()
-        AppManager.largeMap?.getContainer().setAttribute("style", `display:none`);
-        console.log(`[TL] CALL ${this.timeIndicator.toString()}`)
+        AppManager.largeMap?.getContainer().setAttribute("style", `display: none`);
+        console.log(`[TL] CALL ${this.timeIndicator.toString()} `)
 
-        console.log(`[TL] addMapPanel ${this.timeIndicator.toString()}`)
-        AppManager.mapPanels = AppManager.addMapPanel()
+        console.log(`[TL] addMapPanel ${this.timeIndicator.toString()} `)
+        AppManager.status = StatusType.HORIZONTAL
+        AppManager.mapPanels = AppManager.addPreloadMapPanel()
         AppManager.showMapPanel()
 
       }, []
         , "+=5")
       .call(() => {
-        // AppManager.largeMap?.jumpTo({ zoom: 14.0 })
-      }, []
-        , "+=5"
-      )
-      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
-        , "+=5")
-      .call(() => { console.log(`[TL] CALL ${this.timeIndicator.toString()}`) }, []
-        , "+=5")
-
-
-
+        console.log(`[TL] ${this.timeIndicator.toString()} 15:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${15 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 20:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${20 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 30:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${30 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 35:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${35 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 45:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${45 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 50:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toHorizontal()
+      }, [], `${50 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 60:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${60 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
+      .call(() => {
+        console.log(`[TL] ${this.timeIndicator.toString()} 65:00   ${AppManager.timeIndicator.msDiff}`)
+        AppManager.toMosaic()
+      }, [], `${65 - AppManager.timeIndicator.sDiff - (AppManager.timeIndicator.msDiff / 1000)}`)
   }
 
-  static addMapPanel(): MapPanel[] {
+  static addPreloadMapPanel(): MapPanel[] {
+    // console.log(`[Main] addPreloadMapPanel:`)
+
     if (!AppManager.mapGraphics) return []
     if (!AppManager.rasterMaps) return []
 
     let mapPanels: MapPanel[] = []
 
-    for (let i = 0; i < Context.NUMBER_MAPS; i++) {
+    for (let i = 0; i < AppManager.rasterMaps.length; i++) {
       const mapPanel = new MapPanel(AppManager.rasterMaps[i])
       mapPanel.alpha = 0
 
       const indexX = (i % Context.MAPS_COLS)
-      const indexY = Math.floor(i / Context.MAPS_COLS)
+      const generator = seedrandom(MathUtil.getSeed());
+      const randomNumber = generator();
 
-      const cols = [4, 6, 8, 6, 4]
+      const indexY = Math.floor((randomNumber * randomNumber) * Context.MAPS_ROWS)
+
       const panelSize = (ScreenHelper.UNIT * 6)
       const topMargin = ScreenHelper.UNIT * 2
-      const betweenMargin = (ScreenHelper.UNIT * 1)
-      const betweenMarginY = (ScreenHelper.UNIT * 4)
+      const betweenMargin = (ScreenHelper.UNIT * 2)
+      const betweenMarginY = (ScreenHelper.UNIT * 2)
 
-      if (indexX < cols[0]) {
-        mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX
-      }
-      else if (indexX < cols[0] + cols[1]) {
-        mapPanel.x = ScreenHelper.LEFT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - cols[0]) + betweenMargin * (indexX - cols[0])
-      }
-      else if (indexX < cols[0] + cols[1] + cols[2]) {
-        mapPanel.x = ScreenHelper.FRONT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 4 + panelSize * (indexX - (cols[0] + cols[1])) + betweenMargin * (indexX - (cols[0] + cols[1]))
-      }
-      else if (indexX < cols[0] + cols[1] + cols[2] + cols[3]) {
-        mapPanel.x = ScreenHelper.RIGHT_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 5 + panelSize * (indexX - (cols[0] + cols[1] + cols[2])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2]))
-      }
-      else {
-        mapPanel.x = ScreenHelper.BACK_SCREEN_RIGHT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * (indexX - (cols[0] + cols[1] + cols[2] + cols[3])) + betweenMargin * (indexX - (cols[0] + cols[1] + cols[2] + cols[3]))
-      }
-
+      mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + ScreenHelper.UNIT * 3 + panelSize * indexX + betweenMargin * indexX + panelSize * (randomNumber * randomNumber)
       mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
-      // console.log(`[Main: addMapPanel]: ${ indexX } ${ ScreenHelper.BACK_SCREEN_LEFT_MARGIN }`)
 
       AppManager.mapGraphics.addChild(mapPanel)
       mapPanels.push(mapPanel)
-      mapPanel.Start()
+      // mapPanel.Start()
+      // console.log(`[Main] addPreloadMapPanel: ${mapPanels.length}`)
+
     }
 
     return mapPanels
 
   }
 
+  static async addMapPanel(): Promise<MapPanel | void> {
+    if (!AppManager.mapGraphics) return
+    if (!AppManager.rasterMaps) return
+    console.log(`[Main] addMapPanel:`)
+
+    const rasterMap = await AppManager.createRasterMap(AppManager.rasterMaps.length)
+
+    const mapPanel = new MapPanel(rasterMap)
+    // mapPanel.alpha = 0
+
+    // const indexX = (Context.MAPS_COLS)
+    const generator = seedrandom(MathUtil.getSeed());
+    const randomNumber = generator();
+
+    const indexY = Math.floor((randomNumber) * Context.MAPS_ROWS)
+
+    const panelSize = (ScreenHelper.UNIT * 6)
+    const topMargin = ScreenHelper.UNIT * 2
+    const betweenMarginY = (ScreenHelper.UNIT * 2)
+
+    mapPanel.x = ScreenHelper.BACK_SCREEN_LEFT_MARGIN + (panelSize * (Context.MAPS_COLS * 2 * randomNumber))
+    mapPanel.y = topMargin + indexY * panelSize + betweenMarginY * indexY
+
+    AppManager.mapGraphics.addChild(mapPanel)
+
+    mapPanel.alpha = 1.0
+    mapPanel.Start()
+
+    return mapPanel
+
+  }
+
   static async showMapPanel() {
     if (!AppManager) return
     if (!AppManager.mapPanels) return
+
+    if (this.titleText) this.titleText.alpha = 0
+
     let playlist: number[] = []
     for (let i = 0; i < AppManager.mapPanels.length; i++) {
       playlist.push(i)
     }
+    console.log(`[Main] showMapPanel:`)
 
-    playlist = this.shuffle(playlist)
-    if (this.titleText) this.titleText.alpha = 0
 
-    for (let time = 0; time < 4; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / 4)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          map.Start();
-          map.alpha = 1
-        }
-      });
-      await this.sleep(5, () => {
-        console.log('next maps')
-      })
+    // const target = JSON.parse(JSON.stringify(playlist))
+    const target = playlist
+    target.forEach((index: number) => {
+      const mapIndex = target[index]
+      if (this.mapPanels) {
+        const map = this.mapPanels[mapIndex]
+        map.Start();
+        map.alpha = 1
+        // console.log(`[Main] showMapPanel:${mapIndex} ${map.rasterMap.id}`)
+      }
+    });
+  }
+
+
+  static async update(): Promise<void> {
+    if (this.timeIndicator) {
+      this.timeIndicator.update()
+
+      // const sDiff = this.timeIndicator.sDiff
+      // console.log(`[Main]:${AppManager.timeIndicator.toString()} ${sDiff}`)
+
     }
-    await this.sleep(5, () => {
-      console.log('next maps')
-    })
 
-    for (let i = 0; i < AppManager.length; i++) {
-      playlist.push(i)
-    }
-    playlist = this.shuffle(playlist)
-
-    const num = 7
-    for (let time = 0; time < num; time++) {
-      const target = playlist.splice(0, Context.NUMBER_MAPS / num)
-      target.forEach(mapIndex => {
-        if (this.mapPanels) {
-          const map = this.mapPanels[mapIndex]
-          // map.Start();
-          // map.alpha = 0
+    if (AppManager.status === StatusType.HORIZONTAL) {
+      if (AppManager.mapPanels) {
+        if (Clock.CheckSeconds()) {
+          console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
+          for (let i = 0; i < 10; i++) {
+            const mapPanel = await AppManager.addMapPanel()
+            if (mapPanel) AppManager.mapPanels.push(mapPanel)
+          }
         }
-      });
-      await this.sleep(0.05, () => {
-        console.log('next maps')
-      })
+
+        AppManager.mapPanels.forEach(element => {
+          element.x += 1.0;
+        })
+
+      };
+
+    }
+    else if (AppManager.status === StatusType.MOSAIC) {
+      if (AppManager.mosaicMap) {
+        AppManager.mosaicMap.x += 3
+
+        if (AppManager.mosaicDrawCounter === 0) {
+          AppManager.mosaicMap.draw()
+        }
+        AppManager.mosaicDrawCounter++;
+
+        if (AppManager.mosaicDrawCounter > 1) {
+          AppManager.mosaicDrawCounter = 0
+        }
+      }
+    }
+  }
+
+  static async toHorizontal(): Promise<void> {
+    AppManager.status = StatusType.HORIZONTAL
+    console.log(`[Main]:${AppManager.timeIndicator.toString()} toHorizontal ${AppManager.rasterMaps.length}`)
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.visible = false
+    }
+    if (AppManager.mapGraphics) AppManager.mapGraphics.visible = true
+    if (AppManager.mapPanels) {
+      console.log(`[Main]:${AppManager.timeIndicator.toString()} CheckSeconds`)
+      for (let i = 0; i < 10; i++) {
+        const mapPanel = await AppManager.addMapPanel()
+        if (mapPanel) AppManager.mapPanels.push(mapPanel)
+      }
     }
 
   }
 
 
-  static update(): void {
-    if (this.timeIndicator) this.timeIndicator.update()
+  static toMosaic(): void {
+    AppManager.status = StatusType.MOSAIC
+    console.log(`[Main]:${AppManager.timeIndicator.toString()} toMosaic ${AppManager.rasterMaps.length}`)
+    if (!AppManager.mapPanels) return
+
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.visible = true
+      AppManager.mosaicMap.x = -900
+    }
+
+    const textures: RenderTexture[] = []
+
+    // const renderer = autoDetectRenderer({ width: 600, height: 600 })
+    AppManager.prevPosition = []
+
+    AppManager.mapPanels.forEach(mapPanel => {
+      if (this.app) {
+        mapPanel.visible = true
+
+        const renderTexture = RenderTexture.create({ width: ScreenHelper.UNIT * 6, height: ScreenHelper.UNIT * 8 })
+
+        const prevPos: Position = { x: mapPanel.x, y: mapPanel.y }
+        AppManager.prevPosition.push({ x: mapPanel.x, y: mapPanel.y })
+        mapPanel.x = 0
+        mapPanel.y = 0
+        if (renderTexture && mapPanel.mapSprite) this.app.renderer.render(mapPanel, { renderTexture })
+        mapPanel.x = prevPos.x
+        mapPanel.y = prevPos.y
+
+        textures.push(renderTexture)
+
+        mapPanel.visible = false
+      }
+    });
+
+    if (AppManager.mosaicMap) {
+      AppManager.mosaicMap.textures = textures
+      AppManager.mosaicMap.draw()
+    }
+    if (AppManager.mapGraphics) AppManager.mapGraphics.visible = false
+
   }
 
 }

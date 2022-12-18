@@ -20,7 +20,7 @@ export class ScreenHelper {
   public static RIGHT_SCREEN_LEFT_MARGIN: number = 0
 
   public static DIVISIONS: number = 32
-  public static UNIT: number = Context.STAGE_HEIGHT / this.DIVISIONS
+  public static UNIT: number = Math.floor(Context.STAGE_HEIGHT / this.DIVISIONS)
 
   /**
    * NEORT++用のスクリーンエリア
