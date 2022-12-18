@@ -8,7 +8,7 @@ export class Context {
     public static NUMBER_MAPS: number = this.MAPS_COLS * this.MAPS_ROWS
     public static PRELOAD_MAPS: number = 40
 
-    public static MOSAIC_COLS: number = 60
+    public static MOSAIC_COLS: number = 66
     public static MOSAIC_ROWS: number = 3
     public static NUMBER_MOSAIC: number = this.MOSAIC_COLS * this.MOSAIC_ROWS
 

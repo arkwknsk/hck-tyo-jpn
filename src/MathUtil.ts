@@ -29,7 +29,6 @@ export class MathUtil {
     return Math.random() * (max - min + 1) + min //The maximum is inclusive and the minimum is inclusive
   }
 
-  //MathUtil.getSeed()
   static getRandomInclusiveSeed(seed: string, min: number, max: number): number {
     const generator = seedrandom(seed);
     const randomNumber = generator();
