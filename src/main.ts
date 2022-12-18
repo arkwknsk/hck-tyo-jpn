@@ -244,14 +244,14 @@ export class AppManager {
     AppManager.gridGraphics = new Graphics()
     AppManager.app.stage.addChild(AppManager.gridGraphics)
 
-    const grids = ScreenHelper.GetGrids()
-    const layoutGrid = ScreenHelper.GetLayoutGrid()
-    // ScreenHelper.GetGrids()
-    // ScreenHelper.GetLayoutGrid()
-    if (AppManager.gridGraphics) {
-      AppManager.gridGraphics.addChild(grids)
-      AppManager.gridGraphics.addChild(layoutGrid)
-    }
+    // const grids = ScreenHelper.GetGrids()
+    // const layoutGrid = ScreenHelper.GetLayoutGrid()
+    ScreenHelper.GetGrids()
+    ScreenHelper.GetLayoutGrid()
+    // if (AppManager.gridGraphics) {
+    //   AppManager.gridGraphics.addChild(grids)
+    //   AppManager.gridGraphics.addChild(layoutGrid)
+    // }
 
     this.timeIndicator.x = ScreenHelper.FRONT_SCREEN_LEFT
     // AppManager.gridGraphics.addChild(this.timeIndicator)
